@@ -26,7 +26,16 @@ $Project "Server (HL2MP)"
 	{
 		$Folder	"Day of Defeat Source"
 		{
-			
+			$File	"$SRCDIR\game\shared\dods\weapons\dods_melees.h"
+			$File	"$SRCDIR\game\shared\dods\weapons\dods_melees.cpp"
+			$File	"$SRCDIR\game\shared\dods\weapons\dods_rifles.cpp"
+			$File	"$SRCDIR\game\shared\dods\weapons\dods_rifles.h"
+			$File	"$SRCDIR\game\shared\dods\weapons\dods_pistols.cpp"
+			$File	"$SRCDIR\game\shared\dods\weapons\dods_pistols.h"
+			$File	"$SRCDIR\game\shared\dods\weapons\dods_smgs.cpp"
+			$File	"$SRCDIR\game\shared\dods\weapons\dods_smgs.h"
+			$File	"$SRCDIR\game\shared\dods\weapons\dods_weaponbase.cpp"
+			$File	"$SRCDIR\game\shared\dods\weapons\dods_weaponbase.h"
 		}
 
 		$File	"ai_relationship.cpp"
