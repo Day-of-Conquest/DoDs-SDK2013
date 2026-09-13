@@ -1,3 +1,11 @@
+# Day of Conquest SDK 2013
+
+Code and assets for Day of Conquest remade on a clean SDK without any leaks. Suitable for a steam release
+
+Day of Conquest is a mod for Day of Defeat Source that introduces new and cut content and general improvements to the base game. 
+
+Requires SDK 2013 and DoD:S installed. 
+
 # Source SDK 2013
 
 Source code for Source SDK 2013.
