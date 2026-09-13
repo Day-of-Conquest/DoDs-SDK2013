@@ -6,7 +6,7 @@
 
 #include "cbase.h"
 #include "dods_weaponbase.h"
-
+#include "in_buttons.h"
 
 IMPLEMENT_NETWORKCLASS_ALIASED(WeaponDODSBase, DT_WeaponDODSBase)
 
@@ -61,6 +61,121 @@ CWeaponDODSBase::CWeaponDODSBase()
 
 #ifdef CLIENT_DLL
 	m_flScopePercent = 0.0f;
+#endif
+}
+
+void CWeaponDODSBase::SecondaryAttack(void)
+{
+#ifdef DODS_REMAKE
+	CBasePlayer *owner = GetPlayerOwner();
+
+	if (!owner || !owner->IsAlive() || m_bInReload)
+		return;
+
+	switch (GetDODWeaponType())
+	{
+	case DOD_WEAPON_TYPE_RIFLE:
+	case DOD_WEAPON_TYPE_SNIPER:
+		if (owner->m_afButtonPressed & IN_ATTACK2)
+		{
+			ToggleScope();
+		}
+		break;
+
+	case DOD_WEAPON_TYPE_SMG:
+		SecondaryPunch();
+		break;
+
+	default:
+		break;
+	}
+#else
+	BaseClass::SecondaryAttack();
+#endif
+}
+
+#define DOD_PUNCH_RANGE			64.0f
+#define DOD_PUNCH_DAMAGE		25.0f
+#define DOD_PUNCH_REFIRE_TIME	0.45f
+
+void CWeaponDODSBase::SecondaryPunch(void)
+{
+	CBasePlayer *owner = GetPlayerOwner();
+
+	if (!owner || !owner->IsAlive())
+		return;
+
+	if (m_flNextSecondaryAttack > gpGlobals->curtime)
+		return;
+
+	if (m_bInReload)
+	{
+		m_bInReload = false;
+		owner->m_flNextAttack = gpGlobals->curtime;
+	}
+
+	SendWeaponAnim(ACT_VM_SECONDARYATTACK);
+	owner->SetAnimation(PLAYER_ATTACK1);
+
+	m_flNextPrimaryAttack = gpGlobals->curtime + DOD_PUNCH_REFIRE_TIME;
+	m_flNextSecondaryAttack = gpGlobals->curtime + DOD_PUNCH_REFIRE_TIME;
+
+#ifndef CLIENT_DLL
+
+	Vector vecForward;
+	owner->EyeVectors(&vecForward);
+
+	Vector vecStart = owner->Weapon_ShootPosition();
+	Vector vecEnd = vecStart + vecForward * 64.0f;
+
+	trace_t tr;
+
+	UTIL_TraceLine(
+		vecStart,
+		vecEnd,
+		MASK_SHOT_HULL,
+		owner,
+		COLLISION_GROUP_NONE,
+		&tr
+	);
+
+	if (tr.fraction == 1.0f)
+	{
+		Vector vecMins(-16.0f, -16.0f, -16.0f);
+		Vector vecMaxs(16.0f, 16.0f, 16.0f);
+
+		UTIL_TraceHull(
+			vecStart,
+			vecEnd,
+			vecMins,
+			vecMaxs,
+			MASK_SHOT_HULL,
+			owner,
+			COLLISION_GROUP_NONE,
+			&tr
+		);
+	}
+
+	if (tr.m_pEnt)
+	{
+		CTakeDamageInfo info(
+			owner,
+			owner,
+			this,
+			25.0f,
+			DMG_CLUB
+		);
+
+		CalculateMeleeDamageForce(
+			&info,
+			vecForward,
+			tr.endpos,
+			1.0f
+		);
+
+		tr.m_pEnt->TakeDamage(info);
+	}
+
 #endif
 }
 
@@ -208,3 +323,273 @@ void CWeaponDODSBase::Drop(const Vector &velocity)
 	BaseClass::Drop(velocity);
 }
 #endif
+
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
+DODWeaponType CWeaponDODSBase::GetDODWeaponType(void) const
+{
+	return DOD_WEAPON_TYPE_NONE;
+}
+
+
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
+bool CWeaponDODSBase::IsDODPistol(void) const
+{
+	return GetDODWeaponType() == DOD_WEAPON_TYPE_PISTOL;
+}
+
+
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
+bool CWeaponDODSBase::IsDODRifle(void) const
+{
+	return GetDODWeaponType() == DOD_WEAPON_TYPE_RIFLE;
+}
+
+
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
+bool CWeaponDODSBase::IsDODSMG(void) const
+{
+	return GetDODWeaponType() == DOD_WEAPON_TYPE_SMG;
+}
+
+
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
+bool CWeaponDODSBase::IsDODAssaultWeapon(void) const
+{
+	return GetDODWeaponType() == DOD_WEAPON_TYPE_ASSAULT;
+}
+
+
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
+bool CWeaponDODSBase::IsDODMachineGun(void) const
+{
+	return GetDODWeaponType() == DOD_WEAPON_TYPE_MG;
+}
+
+
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
+bool CWeaponDODSBase::IsDODSniper(void) const
+{
+	return GetDODWeaponType() == DOD_WEAPON_TYPE_SNIPER;
+}
+
+
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
+float CWeaponDODSBase::GetDODFireRate(void) const
+{
+	switch (GetDODWeaponType())
+	{
+	case DOD_WEAPON_TYPE_PISTOL:
+		return 0.15f;
+
+	case DOD_WEAPON_TYPE_RIFLE:
+		return 0.5f;
+
+	case DOD_WEAPON_TYPE_SMG:
+		return 0.1f;
+
+	case DOD_WEAPON_TYPE_ASSAULT:
+		return 0.1f;
+
+	case DOD_WEAPON_TYPE_MG:
+		return 0.08f;
+
+	case DOD_WEAPON_TYPE_SNIPER:
+		return 1.0f;
+
+	default:
+		return 0.2f;
+	}
+}
+
+
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
+Vector CWeaponDODSBase::GetDODBulletSpread(void) const
+{
+	switch (GetDODWeaponType())
+	{
+	case DOD_WEAPON_TYPE_PISTOL:
+		return VECTOR_CONE_3DEGREES;
+
+	case DOD_WEAPON_TYPE_RIFLE:
+		return VECTOR_CONE_1DEGREES;
+
+	case DOD_WEAPON_TYPE_SMG:
+		return VECTOR_CONE_4DEGREES;
+
+	case DOD_WEAPON_TYPE_ASSAULT:
+		return VECTOR_CONE_3DEGREES;
+
+	case DOD_WEAPON_TYPE_MG:
+		return VECTOR_CONE_4DEGREES;
+
+	case DOD_WEAPON_TYPE_SNIPER:
+		return VECTOR_CONE_1DEGREES;
+
+	default:
+		return VECTOR_CONE_4DEGREES;
+	}
+}
+
+
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
+float CWeaponDODSBase::GetDODRecoilPitchMin(void) const
+{
+	switch (GetDODWeaponType())
+	{
+	case DOD_WEAPON_TYPE_PISTOL:
+		return -1.0f;
+
+	case DOD_WEAPON_TYPE_RIFLE:
+		return -2.5f;
+
+	case DOD_WEAPON_TYPE_SMG:
+		return -1.3f;
+
+	case DOD_WEAPON_TYPE_ASSAULT:
+		return -1.7f;
+
+	case DOD_WEAPON_TYPE_MG:
+		return -1.5f;
+
+	case DOD_WEAPON_TYPE_SNIPER:
+		return -3.0f;
+
+	default:
+		return -1.0f;
+	}
+}
+
+
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
+float CWeaponDODSBase::GetDODRecoilPitchMax(void) const
+{
+	switch (GetDODWeaponType())
+	{
+	case DOD_WEAPON_TYPE_PISTOL:
+		return -0.5f;
+
+	case DOD_WEAPON_TYPE_RIFLE:
+		return -1.5f;
+
+	case DOD_WEAPON_TYPE_SMG:
+		return -0.7f;
+
+	case DOD_WEAPON_TYPE_ASSAULT:
+		return -0.9f;
+
+	case DOD_WEAPON_TYPE_MG:
+		return -0.8f;
+
+	case DOD_WEAPON_TYPE_SNIPER:
+		return -2.0f;
+
+	default:
+		return -0.5f;
+	}
+}
+
+
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
+float CWeaponDODSBase::GetDODRecoilYaw(void) const
+{
+	switch (GetDODWeaponType())
+	{
+	case DOD_WEAPON_TYPE_PISTOL:
+		return 0.35f;
+
+	case DOD_WEAPON_TYPE_RIFLE:
+		return 0.5f;
+
+	case DOD_WEAPON_TYPE_SMG:
+		return 0.45f;
+
+	case DOD_WEAPON_TYPE_ASSAULT:
+		return 0.5f;
+
+	case DOD_WEAPON_TYPE_MG:
+		return 0.55f;
+
+	case DOD_WEAPON_TYPE_SNIPER:
+		return 0.3f;
+
+	default:
+		return 0.3f;
+	}
+}
+
+
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
+void CWeaponDODSBase::FireDODBullet(void)
+{
+	CBasePlayer* pPlayer = ToBasePlayer(GetOwner());
+
+	if (!pPlayer)
+		return;
+
+	Vector vecSrc = pPlayer->Weapon_ShootPosition();
+	Vector vecAiming = pPlayer->GetAutoaimVector(AUTOAIM_5DEGREES);
+
+	FireBulletsInfo_t info;
+
+	info.m_iShots = 1;
+	info.m_vecSrc = vecSrc;
+	info.m_vecDirShooting = vecAiming;
+	info.m_vecSpread = GetDODBulletSpread();
+	info.m_flDistance = MAX_TRACE_LENGTH;
+	info.m_iAmmoType = m_iPrimaryAmmoType;
+	info.m_pAttacker = pPlayer;
+
+	pPlayer->FireBullets(info);
+}
+
+
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
+void CWeaponDODSBase::ApplyDODRecoil(void)
+{
+	CBasePlayer* pPlayer = ToBasePlayer(GetOwner());
+
+	if (!pPlayer)
+		return;
+
+	pPlayer->ViewPunch(
+		QAngle(
+			random->RandomFloat(
+				GetDODRecoilPitchMin(),
+				GetDODRecoilPitchMax()
+			),
+			random->RandomFloat(
+				-GetDODRecoilYaw(),
+				GetDODRecoilYaw()
+			),
+			0.0f
+		)
+	);
+}

@@ -37,8 +37,13 @@ public:
 	CWeaponGarand(void);
 
 	void	PrimaryAttack(void);
-	void	SecondaryAttack(void);
+	//void	SecondaryAttack(void);
 	bool	Reload(void);
+
+	virtual DODWeaponType GetDODWeaponType(void) const
+	{
+		return DOD_WEAPON_TYPE_RIFLE;
+	}
 
 	DECLARE_NETWORKCLASS();
 	DECLARE_PREDICTABLE();
@@ -157,29 +162,7 @@ void CWeaponGarand::PrimaryAttack(void)
 
 
 }
-void CWeaponGarand::SecondaryAttack(void)
-{
-#ifdef DODS_REMAKE
-	CBasePlayer *owner = GetPlayerOwner();
-	if (!owner || !(owner->m_afButtonPressed & IN_ATTACK2))
-		return;
-#endif
-	CBasePlayer* pPlayer = ToBasePlayer(GetOwner());
 
-	Assert(pPlayer);
-
-	if (!pPlayer)
-		return;
-
-	if (!IsScoped())
-	{
-		ScopeIn();
-	}
-	else
-	{
-		ScopeOut();
-	}
-}
 
 //-----------------------------------------------------------------------------
 // Purpose:

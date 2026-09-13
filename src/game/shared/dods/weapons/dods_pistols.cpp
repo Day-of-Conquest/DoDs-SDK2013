@@ -50,6 +50,11 @@ public:
 	DECLARE_NETWORKCLASS();
 	DECLARE_PREDICTABLE();
 
+	virtual DODWeaponType GetDODWeaponType(void) const
+	{
+		return DOD_WEAPON_TYPE_PISTOL;
+	}
+
 #ifndef CLIENT_DLL
 	DECLARE_ACTTABLE();
 #endif
@@ -204,6 +209,11 @@ public:
 	Activity GetDrawActivity(void);
 
 	virtual bool Reload(void);
+
+	virtual DODWeaponType GetDODWeaponType(void) const
+	{
+		return DOD_WEAPON_TYPE_PISTOL;
+	}
 
 	virtual const Vector& GetBulletSpread(void)
 	{
@@ -560,6 +570,11 @@ public:
 	void	PrimaryAttack(void);
 	void	AddViewKick(void);
 	void	DryFire(void);
+
+	virtual DODWeaponType GetDODWeaponType(void) const
+	{
+		return DOD_WEAPON_TYPE_PISTOL;
+	}
 
 	void	UpdatePenaltyTime(void);
 

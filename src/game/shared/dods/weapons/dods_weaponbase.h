@@ -12,6 +12,7 @@
 
 #include "weapon_hl2mpbasehlmpcombatweapon.h"
 #include "weapon_parse.h"
+
 #if defined( CLIENT_DLL )
 #define CWeaponDODSBase C_WeaponDODSBase
 #endif
@@ -50,8 +51,24 @@
 #define DOD_AMMO_RIFLEGRENADE_GER_LIVE		"DOD_AMMO_RIFLEGRENADE_GER_LIVE"
 
 #define DOD_AMMO_SHOTGUN			"DOD_AMMO_SHOTGUN"
-#define DOD_SNIPER_SCOPE_CHANGE_TIME 0.3
 
+#define DOD_SNIPER_SCOPE_CHANGE_TIME 0.3f
+
+
+enum DODWeaponType
+{
+	DOD_WEAPON_TYPE_NONE = 0,
+
+	DOD_WEAPON_TYPE_PISTOL,
+	DOD_WEAPON_TYPE_RIFLE,
+	DOD_WEAPON_TYPE_SMG,
+	DOD_WEAPON_TYPE_ASSAULT,
+	DOD_WEAPON_TYPE_MG,
+	DOD_WEAPON_TYPE_SNIPER,
+	DOD_WEAPON_TYPE_ROCKET,
+	DOD_WEAPON_TYPE_GRENADE,
+	DOD_WEAPON_TYPE_MELEE
+};
 
 
 class CWeaponDODSBase : public CBaseHL2MPCombatWeapon
@@ -62,11 +79,43 @@ public:
 	DECLARE_PREDICTABLE();
 
 	CWeaponDODSBase();
+
 #ifdef DODS_REMAKE
 	virtual bool Holster(CBaseCombatWeapon *pSwitchingTo = NULL) OVERRIDE;
 	virtual bool Reload(void) OVERRIDE;
 	virtual void Drop(const Vector &velocity) OVERRIDE;
 #endif
+
+	//-----------------------------------------------------------------------------
+	// Weapon type
+	//-----------------------------------------------------------------------------
+
+	virtual DODWeaponType GetDODWeaponType(void) const;
+
+	bool IsDODPistol(void) const;
+	bool IsDODRifle(void) const;
+	bool IsDODSMG(void) const;
+	bool IsDODAssaultWeapon(void) const;
+	bool IsDODMachineGun(void) const;
+	bool IsDODSniper(void) const;
+
+	//-----------------------------------------------------------------------------
+	// Weapon firing
+	//-----------------------------------------------------------------------------
+
+	virtual float GetDODFireRate(void) const;
+	virtual Vector GetDODBulletSpread(void) const;
+
+	virtual float GetDODRecoilPitchMin(void) const;
+	virtual float GetDODRecoilPitchMax(void) const;
+	virtual float GetDODRecoilYaw(void) const;
+
+	void FireDODBullet(void);
+	void ApplyDODRecoil(void);
+
+	//-----------------------------------------------------------------------------
+	// Scope
+	//-----------------------------------------------------------------------------
 
 	void SetScoped(bool bScoped) { m_bScoped = bScoped; }
 	bool IsScoped(void) { return m_bScoped; }
@@ -75,6 +124,10 @@ public:
 
 	virtual bool ShouldScopeOutBetweenShots(void) { return true; }
 	virtual bool ShouldReScopeAfterReload(void) { return false; }
+
+	virtual void SecondaryAttack(void) OVERRIDE;
+
+	void SecondaryPunch(void);
 
 	void ToggleScope(void);
 	void ScopeIn(void);
@@ -95,11 +148,13 @@ public:
 
 protected:
 	float m_flScopeInTime;
+
 #ifdef DODS_REMAKE
 	CNetworkVar(float, m_flScopeChangeTime);
 #else
 	float m_flScopeChangeTime;
 #endif
+
 	float m_flUnscopeTime;
 	float m_flRescopeTime;
 
