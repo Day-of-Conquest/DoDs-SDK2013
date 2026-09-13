@@ -11,7 +11,7 @@
 #endif
 
 #include "weapon_hl2mpbasehlmpcombatweapon.h"
-
+#include "weapon_parse.h"
 #if defined( CLIENT_DLL )
 #define CWeaponDODSBase C_WeaponDODSBase
 #endif
@@ -50,6 +50,8 @@
 #define DOD_AMMO_RIFLEGRENADE_GER_LIVE		"DOD_AMMO_RIFLEGRENADE_GER_LIVE"
 
 #define DOD_AMMO_SHOTGUN			"DOD_AMMO_SHOTGUN"
+#define DOD_SNIPER_SCOPE_CHANGE_TIME 0.3
+
 
 
 class CWeaponDODSBase : public CBaseHL2MPCombatWeapon
@@ -60,6 +62,52 @@ public:
 	DECLARE_PREDICTABLE();
 
 	CWeaponDODSBase();
+#ifdef DODS_REMAKE
+	virtual bool Holster(CBaseCombatWeapon *pSwitchingTo = NULL) OVERRIDE;
+	virtual bool Reload(void) OVERRIDE;
+	virtual void Drop(const Vector &velocity) OVERRIDE;
+#endif
+
+	void SetScoped(bool bScoped) { m_bScoped = bScoped; }
+	bool IsScoped(void) { return m_bScoped; }
+
+	virtual float GetScopedFOV(void) { return 20; }
+
+	virtual bool ShouldScopeOutBetweenShots(void) { return true; }
+	virtual bool ShouldReScopeAfterReload(void) { return false; }
+
+	void ToggleScope(void);
+	void ScopeIn(void);
+	void ScopeOut(void);
+	void ScopeOutIn(void);
+
+	void SetReScope(bool bReScope, float flDelay);
+
+	bool IsFullyScoped(void);
+	bool IsScopingIn(void);
+
+#ifdef CLIENT_DLL
+	float GetScopedPercentage(void);
+#endif
+
+	CNetworkVar(bool, m_bScoped);
+	CNetworkVar(bool, m_bViewAnim);
+
+protected:
+	float m_flScopeInTime;
+#ifdef DODS_REMAKE
+	CNetworkVar(float, m_flScopeChangeTime);
+#else
+	float m_flScopeChangeTime;
+#endif
+	float m_flUnscopeTime;
+	float m_flRescopeTime;
+
+	bool m_bRescopeAfterShot;
+
+#ifdef CLIENT_DLL
+	float m_flScopePercent;
+#endif
 
 #ifdef GAME_DLL
 	DECLARE_DATADESC();

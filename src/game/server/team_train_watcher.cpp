@@ -1026,7 +1026,7 @@ void CTeamTrainWatcher::WatcherActivate( void )
 	{
 		int iCPIndex = m_CPLinks[i].hCP.Get()->GetPointIndex();
 // This can be pulled once DoD includes team_objectiveresource.* and c_team_objectiveresource.*
-#ifndef DOD_DLL 
+#if !defined(DOD_DLL) && !defined(DODS_REMAKE)
 		ObjectiveResource()->SetTrainPathDistance( iCPIndex, m_CPLinks[i].flDistanceFromStart / m_flTotalPathDistance );
 #endif
 	}

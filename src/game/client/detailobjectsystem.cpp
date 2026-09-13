@@ -27,7 +27,7 @@
 #include <algorithm>
 #include "tier0/valve_minmax_on.h"
 
-#if defined(DOD_DLL) || defined(CSTRIKE_DLL)
+#if defined(DOD_DLL) || defined(CSTRIKE_DLL) || defined (DODS_REMAKE)
 #define USE_DETAIL_SHAPES
 #endif
 

@@ -135,6 +135,10 @@ public:
 	bool					m_bBuiltRightHanded;
 	bool					m_bAllowFlipping;	// False to disallow flipping the model, regardless of whether
 												// it is built left or right handed.
+#ifdef DODS_REMAKE
+	float	m_flTimeToIdleAfterFire;
+	float	m_flIdleInterval;
+#endif
 
 #if defined( MAPBASE ) || ( DODS_REMAKE )
 	float					m_flViewmodelFOV;

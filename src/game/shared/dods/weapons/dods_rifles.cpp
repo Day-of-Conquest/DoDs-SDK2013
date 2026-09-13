@@ -37,6 +37,7 @@ public:
 	CWeaponGarand(void);
 
 	void	PrimaryAttack(void);
+	void	SecondaryAttack(void);
 	bool	Reload(void);
 
 	DECLARE_NETWORKCLASS();
@@ -156,7 +157,29 @@ void CWeaponGarand::PrimaryAttack(void)
 
 
 }
+void CWeaponGarand::SecondaryAttack(void)
+{
+#ifdef DODS_REMAKE
+	CBasePlayer *owner = GetPlayerOwner();
+	if (!owner || !(owner->m_afButtonPressed & IN_ATTACK2))
+		return;
+#endif
+	CBasePlayer* pPlayer = ToBasePlayer(GetOwner());
 
+	Assert(pPlayer);
+
+	if (!pPlayer)
+		return;
+
+	if (!IsScoped())
+	{
+		ScopeIn();
+	}
+	else
+	{
+		ScopeOut();
+	}
+}
 
 //-----------------------------------------------------------------------------
 // Purpose:

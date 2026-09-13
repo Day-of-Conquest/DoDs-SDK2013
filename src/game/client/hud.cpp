@@ -241,7 +241,7 @@ CHudElement::CHudElement( const char *pElementName )
 	m_bIsParentedToClientDLLRootPanel = false;
 
 	// Make this for all hud elements, but when its a bit safer
-#if defined( TF_CLIENT_DLL ) || defined( DOD_DLL )
+#if defined( TF_CLIENT_DLL ) || defined( DOD_DLL ) || defined (DODS_REMAKE)
 	RegisterForRenderGroup( "global" );
 #endif
 }

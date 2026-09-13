@@ -484,6 +484,11 @@ void FileWeaponInfo_t::Parse( KeyValues *pKeyValuesData, const char *szWeaponNam
 	m_bAllowFlipping = ( pKeyValuesData->GetInt( "AllowFlipping", 1 ) != 0 ) ? true : false;
 	m_bMeleeWeapon = ( pKeyValuesData->GetInt( "MeleeWeapon", 0 ) != 0 ) ? true : false;
 
+#ifdef DODS_REMAKE
+	m_flTimeToIdleAfterFire = pKeyValuesData->GetFloat("IdleTimeAfterFire", 1.0);
+	m_flIdleInterval = pKeyValuesData->GetFloat("IdleInterval", 1.0);
+#endif
+
 #if defined( MAPBASE ) || (DODS_REMAKE )
 	m_flViewmodelFOV = pKeyValuesData->GetFloat( "viewmodel_fov", 0.0f );
 	m_flBobScale = pKeyValuesData->GetFloat( "bob_scale", 1.0f );
