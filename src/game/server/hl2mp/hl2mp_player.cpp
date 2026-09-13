@@ -300,7 +300,10 @@ void CHL2MP_Player::GiveDefaultItems( void )
 	GiveNamedItem( "weapon_smg1" );
 	GiveNamedItem( "weapon_frag" );
 	GiveNamedItem( "weapon_physcannon" );
+#else
+	GiveNamedItem("weapon_colt");
 #endif // !DODS_REMAKE
+
 
 	const char *szDefaultWeaponName = engine->GetClientConVarValue( engine->IndexOfEdict( edict() ), "cl_defaultweapon" );
 

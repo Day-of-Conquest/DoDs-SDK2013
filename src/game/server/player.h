@@ -268,6 +268,10 @@ public:
 	void					HideViewModels( void );
 	void					DestroyViewModels( void );
 
+#if defined(MAPBASE) && defined(HL2_DLL) || defined(DODS_REMAKE)
+	virtual void			CreateHandModel(int viewmodelindex = 1, int iOtherVm = 0);
+#endif
+
 	CPlayerState			*PlayerData( void ) { return &pl; }
 	
 	int						RequiredEdictIndex( void ) { return ENTINDEX(edict()); } 

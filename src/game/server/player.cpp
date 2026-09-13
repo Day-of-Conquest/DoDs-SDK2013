@@ -535,6 +535,53 @@ void CBasePlayer::DestroyViewModels( void )
 	}
 }
 
+#if defined(MAPBASE) && defined(HL2_DLL) || defined(DODS_REMAKE)
+extern char g_szDefaultHandsModel[MAX_PATH];
+//extern int g_iDefaultHandsSkin;
+//extern int g_iDefaultHandsBody;
+
+int g_iDefaultHandsSkin = 0;
+int g_iDefaultHandsBody = 0;
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void CBasePlayer::CreateHandModel(int index, int iOtherVm)
+{
+	Assert(index >= 0 && index < MAX_VIEWMODELS && iOtherVm >= 0 && iOtherVm < MAX_VIEWMODELS );
+
+	if (GetViewModel( index ))
+	{
+		// This can happen if the player respawns
+		// Don't draw unless we're already using a hands weapon
+		if ( !GetActiveWeapon() || !GetActiveWeapon()->UsesHands() )
+			GetViewModel( index )->AddEffects( EF_NODRAW );
+		return;
+	}
+
+	CBaseViewModel *vm = (CBaseViewModel *)CreateEntityByName("hand_viewmodel");
+	if (vm)
+	{
+		vm->SetAbsOrigin(GetAbsOrigin());
+		vm->SetOwner(this);
+		vm->SetIndex(index);
+
+#ifdef DODS_REMAKE
+		vm->SetModel("models/weapons/c_arms_dod.mdl");
+#else
+		vm->SetModel( g_szDefaultHandsModel );
+#endif
+		vm->m_nSkin = g_iDefaultHandsSkin;
+		vm->m_nBody = g_iDefaultHandsBody;
+
+		DispatchSpawn(vm);
+		vm->FollowEntity(GetViewModel(iOtherVm), true);
+		m_hViewModel.Set(index, vm);
+		vm->AddEffects( EF_NODRAW );
+	}
+}
+#endif
+
 //-----------------------------------------------------------------------------
 // Purpose: Static member function to create a player of the specified class
 // Input  : *className - 
@@ -5131,6 +5178,11 @@ void CBasePlayer::Spawn( void )
 
 	CreateViewModel();
 
+#ifdef DODS_REMAKE
+	PrecacheModel("models/weapons/c_arms_dod.mdl");
+	CreateHandModel();
+#endif
+
 	SetCollisionGroup( COLLISION_GROUP_PLAYER );
 
 	// if the player is locked, make sure he stays locked
@@ -5268,7 +5320,6 @@ void CBasePlayer::Precache( void )
 
 	if ( gInitHUD )
 		m_fInitHUD = true;
-
 }
 
 //-----------------------------------------------------------------------------

@@ -199,7 +199,9 @@ public:
 
 	void	UpdatePenaltyTime(void);
 
-	Activity	GetPrimaryAttackActivity(void);
+	Activity GetIdleActivity(void);
+	Activity GetPrimaryAttackActivity(void);
+	Activity GetDrawActivity(void);
 
 	virtual bool Reload(void);
 
@@ -310,6 +312,41 @@ IMPLEMENT_ACTTABLE(CWeaponP38);
 
 #endif
 
+Activity CWeaponP38::GetIdleActivity(void)
+{
+	Activity actIdle;
+
+	if (m_iClip1 <= 0)
+		actIdle = ACT_VM_IDLE_EMPTY;
+	else
+		actIdle = ACT_VM_IDLE;
+
+	return actIdle;
+}
+
+Activity CWeaponP38::GetPrimaryAttackActivity(void)
+{
+	Activity actPrim;
+
+	if (m_iClip1 <= 0)
+		actPrim = ACT_VM_PRIMARYATTACK_EMPTY;
+	else
+		actPrim = ACT_VM_PRIMARYATTACK;
+
+	return actPrim;
+}
+
+Activity CWeaponP38::GetDrawActivity(void)
+{
+	Activity actDraw;
+
+	if (m_iClip1 <= 0)
+		actDraw = ACT_VM_DRAW_EMPTY;
+	else
+		actDraw = ACT_VM_DRAW;
+
+	return actDraw;
+}
 
 //-----------------------------------------------------------------------------
 // Purpose: Constructor
@@ -466,24 +503,6 @@ void CWeaponP38::ItemPostFrame(void)
 //-----------------------------------------------------------------------------
 // Purpose:
 //-----------------------------------------------------------------------------
-Activity CWeaponP38::GetPrimaryAttackActivity(void)
-{
-	if (m_nNumShotsFired < 1)
-		return ACT_VM_PRIMARYATTACK;
-
-	if (m_nNumShotsFired < 2)
-		return ACT_VM_RECOIL1;
-
-	if (m_nNumShotsFired < 3)
-		return ACT_VM_RECOIL2;
-
-	return ACT_VM_RECOIL3;
-}
-
-
-//-----------------------------------------------------------------------------
-// Purpose:
-//-----------------------------------------------------------------------------
 bool CWeaponP38::Reload(void)
 {
 	bool fRet = DefaultReload(GetMaxClip1(), GetMaxClip2(), ACT_VM_RELOAD);
@@ -544,7 +563,11 @@ public:
 
 	void	UpdatePenaltyTime(void);
 
-	Activity	GetPrimaryAttackActivity(void);
+	Activity GetIdleActivity(void);
+	Activity GetPrimaryAttackActivity(void);
+	Activity GetDrawActivity(void);
+
+	Activity GetReloadActivity(void);
 
 	virtual bool Reload(void);
 
@@ -655,6 +678,53 @@ IMPLEMENT_ACTTABLE(CWeaponColt);
 
 #endif
 
+Activity CWeaponColt::GetIdleActivity(void)
+{
+	Activity actIdle;
+
+	if (m_iClip1 <= 0)
+		actIdle = ACT_VM_IDLE_EMPTY;
+	else
+		actIdle = ACT_VM_IDLE;
+
+	return actIdle;
+}
+
+Activity CWeaponColt::GetPrimaryAttackActivity(void)
+{
+	Activity actPrim;
+
+	if (m_iClip1 <= 0)
+		actPrim = ACT_VM_PRIMARYATTACK_EMPTY;
+	else
+		actPrim = ACT_VM_PRIMARYATTACK;
+
+	return actPrim;
+}
+
+Activity CWeaponColt::GetDrawActivity(void)
+{
+	Activity actDraw;
+
+	if (m_iClip1 <= 0)
+		actDraw = ACT_VM_DRAW_EMPTY;
+	else
+		actDraw = ACT_VM_DRAW;
+
+	return actDraw;
+}
+
+Activity CWeaponColt::GetReloadActivity(void)
+{
+	Activity actReload;
+
+	if (m_iClip1 <= 0)
+		actReload = ACT_VM_RELOAD_EMPTY;
+	else
+		actReload = ACT_VM_RELOAD;
+
+	return actReload;
+}
 
 //-----------------------------------------------------------------------------
 // Purpose: Constructor
@@ -805,24 +875,6 @@ void CWeaponColt::ItemPostFrame(void)
 	{
 		DryFire();
 	}
-}
-
-
-//-----------------------------------------------------------------------------
-// Purpose:
-//-----------------------------------------------------------------------------
-Activity CWeaponColt::GetPrimaryAttackActivity(void)
-{
-	if (m_nNumShotsFired < 1)
-		return ACT_VM_PRIMARYATTACK;
-
-	if (m_nNumShotsFired < 2)
-		return ACT_VM_RECOIL1;
-
-	if (m_nNumShotsFired < 3)
-		return ACT_VM_RECOIL2;
-
-	return ACT_VM_RECOIL3;
 }
 
 

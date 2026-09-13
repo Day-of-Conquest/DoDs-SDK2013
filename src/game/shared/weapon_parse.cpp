@@ -76,10 +76,12 @@ extern itemFlags_t g_ItemFlags[8];
 
 static CUtlDict< FileWeaponInfo_t*, unsigned short > m_WeaponInfoDatabase;
 
+#ifndef MAPBASE // Mapbase makes weapons in the same slot & position swap each other out, which is a feature mods can intentionally use.
 #ifdef _DEBUG
 // used to track whether or not two weapons have been mistakenly assigned the wrong slot
 bool g_bUsedWeaponSlots[MAX_WEAPON_SLOTS][MAX_WEAPON_POSITIONS] = { { false } };
 
+#endif
 #endif
 
 //-----------------------------------------------------------------------------
@@ -154,8 +156,10 @@ void ResetFileWeaponInfoDatabase( void )
 	}
 	m_WeaponInfoDatabase.RemoveAll();
 
+#ifndef MAPBASE // Mapbase makes weapons in the same slot & position swap each other out, which is a feature mods can intentionally use.
 #ifdef _DEBUG
 	memset(g_bUsedWeaponSlots, 0, sizeof(g_bUsedWeaponSlots));
+#endif
 #endif
 }
 #endif
@@ -279,15 +283,57 @@ bool ReadWeaponDataFromFileForSlot( IFileSystem* pFilesystem, const char *szWeap
 	FileWeaponInfo_t *pFileInfo = GetFileWeaponInfoFromHandle( *phandle );
 	Assert( pFileInfo );
 
+#ifdef MAPBASE
+	if ( pFileInfo->bParsedScript && !pFileInfo->bCustom )
+#else
 	if ( pFileInfo->bParsedScript )
+#endif
 		return true;
 
 	char sz[128];
 	Q_snprintf( sz, sizeof( sz ), "scripts/%s", szWeaponName );
+	KeyValues *pKV = ReadEncryptedKVFile( pFilesystem, sz, pICEKey, false );
 
-	KeyValues *pKV = ReadEncryptedKVFile( pFilesystem, sz, pICEKey,
+	if ( !pKV )
+		return false;
+
+#ifdef MAPBASE
+	pFileInfo->bCustom = false;
+#endif
+	pFileInfo->Parse( pKV, szWeaponName );
+
+	pKV->deleteThis();
+
+	return true;
+}
+
+#ifdef MAPBASE
+extern const char *g_MapName;
+
+bool ReadCustomWeaponDataFromFileForSlot( IFileSystem* filesystem, const char *szWeaponName, WEAPON_FILE_INFO_HANDLE *phandle, const unsigned char *pICEKey )
+{
+	if ( !phandle )
+	{
+		Assert( 0 );
+		return false;
+	}
+	
+	*phandle = FindWeaponInfoSlot( szWeaponName );
+	FileWeaponInfo_t *pFileInfo = GetFileWeaponInfoFromHandle( *phandle );
+	Assert( pFileInfo );
+
+	// Just parse the custom script anyway even if it was already loaded. This is because after one is loaded,
+	// there's no way of distinguishing between maps with no custom scripts and maps with their own new custom scripts.
+	//if ( pFileInfo->bParsedScript && pFileInfo->bCustom )
+	//	return true;
+
+	char sz[128];
+	Q_snprintf( sz, sizeof( sz ), "maps/%s_%s", g_MapName, szWeaponName );
+
+	KeyValues *pKV = ReadEncryptedKVFile( filesystem, sz, pICEKey,
 #if defined( DOD_DLL )
-		true			// Only read .ctx files!
+		false			// Only read .ctx files!.
+	                    // nO DON'T 
 #else
 		false
 #endif
@@ -296,12 +342,14 @@ bool ReadWeaponDataFromFileForSlot( IFileSystem* pFilesystem, const char *szWeap
 	if ( !pKV )
 		return false;
 
+	pFileInfo->bCustom = true;
 	pFileInfo->Parse( pKV, szWeaponName );
 
 	pKV->deleteThis();
 
 	return true;
 }
+#endif
 
 
 //-----------------------------------------------------------------------------
@@ -347,11 +395,35 @@ FileWeaponInfo_t::FileWeaponInfo_t()
 	bShowUsageHint = false;
 	m_bAllowFlipping = true;
 	m_bBuiltRightHanded = true;
+#if defined( MAPBASE ) || (DODS_REMAKE )
+	m_flViewmodelFOV = 0.0f;
+	m_flBobScale = 1.0f;
+	m_flSwayScale = 1.0f;
+	m_flSwaySpeedScale = 1.0f;
+	szDroppedModel[0] = 0;
+	m_bUsesHands = false;
+	m_nHandRig = HANDRIG_DEFAULT;
+	m_nWeaponRestriction = WPNRESTRICT_NONE;
+#endif
 }
 
 #ifdef CLIENT_DLL
 extern ConVar hud_fastswitch;
 #endif
+
+#if defined( MAPBASE ) || (DODS_REMAKE )
+const char* pHandRigs[NUM_HAND_RIG_TYPES] = {
+	"default",
+	"css",
+	"blender",
+};
+
+const char* pWeaponRestrictions[NUM_WEAPON_RESTRICTION_TYPES] = {
+	"none",
+	"player_only",
+	"npc_only",
+};
+#endif // MAPBASE
 
 void FileWeaponInfo_t::Parse( KeyValues *pKeyValuesData, const char *szWeaponName )
 {
@@ -412,6 +484,44 @@ void FileWeaponInfo_t::Parse( KeyValues *pKeyValuesData, const char *szWeaponNam
 	m_bAllowFlipping = ( pKeyValuesData->GetInt( "AllowFlipping", 1 ) != 0 ) ? true : false;
 	m_bMeleeWeapon = ( pKeyValuesData->GetInt( "MeleeWeapon", 0 ) != 0 ) ? true : false;
 
+#if defined( MAPBASE ) || (DODS_REMAKE )
+	m_flViewmodelFOV = pKeyValuesData->GetFloat( "viewmodel_fov", 0.0f );
+	m_flBobScale = pKeyValuesData->GetFloat( "bob_scale", 1.0f );
+	m_flSwayScale = pKeyValuesData->GetFloat( "sway_scale", 1.0f );
+	m_flSwaySpeedScale = pKeyValuesData->GetFloat( "sway_speed_scale", 1.0f );
+
+	Q_strncpy( szDroppedModel, pKeyValuesData->GetString( "droppedmodel" ), MAX_WEAPON_STRING );
+
+	m_bUsesHands = ( pKeyValuesData->GetInt( "uses_hands", 0 ) != 0 ) ? true : false;
+
+	const char* pszHandRig = pKeyValuesData->GetString("hand_rig", nullptr);
+	if (pszHandRig)
+	{
+		for (int i = 0; i < NUM_HAND_RIG_TYPES; i++)
+		{
+			if (V_stricmp(pszHandRig, pHandRigs[i]) == 0)
+			{
+				m_nHandRig = i;
+				break;
+			}
+		}
+	}
+
+	const char* pszRestrictString = pKeyValuesData->GetString("usage_restriction", nullptr);
+	if (pszRestrictString)
+	{
+		for (int i = 0; i < NUM_WEAPON_RESTRICTION_TYPES; i++)
+		{
+			if (V_stricmp(pszRestrictString, pWeaponRestrictions[i]) == 0)
+			{
+				m_nWeaponRestriction = i;
+				break;
+			}
+		}
+	}
+#endif
+
+#ifndef MAPBASE // Mapbase makes weapons in the same slot & position swap each other out, which is a feature mods can intentionally use.
 #if defined(_DEBUG) && defined(HL2_CLIENT_DLL)
 	// make sure two weapons aren't in the same slot & position
 	if ( iSlot >= MAX_WEAPON_SLOTS ||
@@ -428,6 +538,7 @@ void FileWeaponInfo_t::Parse( KeyValues *pKeyValuesData, const char *szWeaponNam
 		}
 		g_bUsedWeaponSlots[iSlot][iPosition] = true;
 	}
+#endif
 #endif
 
 	// Primary ammo used

@@ -115,6 +115,8 @@ static const char *s_PreserveEnts[] =
 #ifdef DODS_REMAKE
 	"info_player_allies",
 	"info_player_axis",
+	"hand_viewmodel",
+	"func_team_wall",
 #endif
 	"info_map_parameters",
 	"keyframe_rope",
