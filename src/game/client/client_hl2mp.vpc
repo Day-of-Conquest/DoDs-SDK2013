@@ -35,6 +35,13 @@ $Project "Client (HL2MP)"
 		$File	"$SRCDIR\game\shared\teamplay_round_timer.cpp"
 		$File	"$SRCDIR\game\shared\teamplay_round_timer.h"
 
+
+		$Folder	"Day of Defeat Source"
+		{
+			$File "dods\ui\dods_teammenu.cpp"
+			$File "dods\ui\dods_teammenu.h"
+		}
+
 		$Folder	"NextBot"
 		{
 			$File	"NextBot\C_NextBot.cpp"
@@ -164,8 +171,6 @@ $Project "Client (HL2MP)"
 
 			$Folder	"UI"
 			{
-				$File "hl2mp\ui\dods_teammenu.cpp"
-				$File "hl2mp\ui\dods_teammenu.h"
 				$File	"hl2mp\ui\backgroundpanel.cpp"
 				$File	"hl2mp\ui\backgroundpanel.h"
 				$File	"hl2mp\hl2mp_hud_chat.cpp"

@@ -19,7 +19,7 @@
 #include "hl2mptextwindow.h"
 #include "ienginevgui.h"
 #ifdef DODS_REMAKE
-#include "dods_teammenu.h"
+#include "dods/ui/dods_teammenu.h"
 #endif
 
 // memdbgon must be the last include file in a .cpp file!!!
