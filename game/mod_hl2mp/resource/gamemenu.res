@@ -53,5 +53,10 @@
 		"label" "#GameUI_GameMenu_Quit"
 		"command" "Quit"
 	}
+	"12"
+	{
+		"label" "Pre-order Day OF Defeat 3"
+		"command" "map dm_lockdown"
+	}
 }
 

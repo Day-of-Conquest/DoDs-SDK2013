@@ -1,13 +1,15 @@
 "GameInfo"
 {
 	game	"DoC: Remade"
-	title	"HALF+LIFE'"
-	title2	"deathmatch"
+	title	""
+	icon	"resource/game"
 	type multiplayer_only
+	gamelogo 1
 	nomodels 0
 	nohimodel 1
-	nocrosshair 1
 	supportsvr	1
+	nocrosshair 1
+	advcrosshair 2
 	hidden_maps
 	{
 		"test_speakers"		1
