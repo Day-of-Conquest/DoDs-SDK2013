@@ -164,6 +164,8 @@ $Project "Client (HL2MP)"
 
 			$Folder	"UI"
 			{
+				$File "hl2mp\ui\dods_teammenu.cpp"
+				$File "hl2mp\ui\dods_teammenu.h"
 				$File	"hl2mp\ui\backgroundpanel.cpp"
 				$File	"hl2mp\ui\backgroundpanel.h"
 				$File	"hl2mp\hl2mp_hud_chat.cpp"

@@ -317,6 +317,10 @@ void CHL2MP_Player::GiveDefaultItems( void )
 
 void CHL2MP_Player::PickDefaultSpawnTeam( void )
 {
+#ifdef DODS_REMAKE
+	if ( !IsFakeClient() && GetTeamNumber() == TEAM_UNASSIGNED )
+		return;
+#endif
 	if ( GetTeamNumber() == 0 )
 	{
 		if ( HL2MPRules()->IsTeamplay() == false )
@@ -417,6 +421,13 @@ void CHL2MP_Player::Spawn(void)
 	SetPlayerUnderwater(false);
 
 	m_bReady = false;
+#ifdef DODS_REMAKE
+	if ( GetTeamNumber() == TEAM_UNASSIGNED )
+	{
+		RemoveAllItems( true );
+		State_Transition( STATE_OBSERVER_MODE );
+	}
+#endif
 }
 
 bool CHL2MP_Player::ValidatePlayerModel( const char *pModel )
@@ -1052,6 +1063,9 @@ void CHL2MP_Player::ChangeTeam( int iTeam )
 bool CHL2MP_Player::HandleCommand_JoinTeam( int team )
 {
 #ifdef DODS_REMAKE
+	const bool enteringPlay = GetTeamNumber() == TEAM_UNASSIGNED || GetTeamNumber() == TEAM_SPECTATOR;
+#endif
+#ifdef DODS_REMAKE
 	if ( team == TEAM_UNASSIGNED )
 	{
 		CTeam *pAmericans = GetGlobalTeam( TEAM_AMERICANS );
@@ -1101,6 +1115,11 @@ bool CHL2MP_Player::HandleCommand_JoinTeam( int team )
 
 	// Switch their actual team...
 	ChangeTeam( team );
+
+#ifdef DODS_REMAKE
+	if ( enteringPlay )
+		Spawn();
+#endif
 
 	return true;
 }
@@ -1443,6 +1462,19 @@ void CHL2MP_Player::DeathSound( const CTakeDamageInfo &info )
 
 CBaseEntity* CHL2MP_Player::EntSelectSpawnPoint( void )
 {
+#ifdef DODS_REMAKE
+	if ( GetTeamNumber() == TEAM_UNASSIGNED || GetTeamNumber() == TEAM_SPECTATOR )
+	{
+		const char *cameraSpots[] = { "info_player_start", "info_player_allies",
+			"info_player_axis", "info_player_deathmatch", "info_player_combine", "info_player_rebel" };
+		for ( int i = 0; i < ARRAYSIZE( cameraSpots ); ++i )
+		{
+			CBaseEntity *camera = gEntList.FindEntityByClassname( NULL, cameraSpots[i] );
+			if ( camera ) return camera;
+		}
+		return GetContainingEntity( INDEXENT( 0 ) );
+	}
+#endif
 	CBaseEntity *pSpot = NULL;
 	CBaseEntity *pLastSpawnPoint = g_pLastSpawn;
 	edict_t		*player = edict();

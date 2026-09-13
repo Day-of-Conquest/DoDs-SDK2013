@@ -18,6 +18,9 @@
 #include "hl2mpclientscoreboard.h"
 #include "hl2mptextwindow.h"
 #include "ienginevgui.h"
+#ifdef DODS_REMAKE
+#include "dods_teammenu.h"
+#endif
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -60,6 +63,13 @@ protected:
 	}
 
 	virtual IViewPortPanel *CreatePanelByName( const char *szPanelName );
+#ifdef DODS_REMAKE
+	virtual void CreateDefaultPanels() OVERRIDE
+	{
+		BaseClass::CreateDefaultPanels();
+		AddNewPanel( CreatePanelByName( PANEL_TEAM ), "PANEL_TEAM" );
+	}
+#endif
 };
 
 int ClientModeHL2MPNormal::GetDeathMessageStartHeight( void )
@@ -70,6 +80,11 @@ int ClientModeHL2MPNormal::GetDeathMessageStartHeight( void )
 IViewPortPanel* CHudViewport::CreatePanelByName( const char *szPanelName )
 {
 	IViewPortPanel* newpanel = NULL;
+
+#ifdef DODS_REMAKE
+	if ( Q_strcmp( PANEL_TEAM, szPanelName ) == 0 )
+		return new CDODSTeamMenu( this );
+#endif
 
 	if ( Q_strcmp( PANEL_SCOREBOARD, szPanelName) == 0 )
 	{

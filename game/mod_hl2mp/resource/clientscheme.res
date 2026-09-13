@@ -22,7 +22,7 @@ Scheme
 		"Orange"			"255 176 0 255"
 		"OrangeDim"			"255 176 0 120"
 		"LightOrange"		"188 112 0 128"
-		
+
 		"Red"				"192 28 0 140"
 		"Black"				"0 0 0 255"
 		"TransparentBlack"	"0 0 0 196"
@@ -32,43 +32,47 @@ Scheme
 		"White"				"255 255 255 255"
 		"TransparentWhite"	"255 255 255 128"
 		"MoreTransparentWhite"	"255 255 255 64"
-		
-		"ClassInfoBackground"	"255 255 255 32"		
+
+		"ClassInfoBackground"	"255 255 255 32"
 		"WeaponInfoBackground"	"255 255 255 16"
-		
+
 		"ClassMenuLight"	"251 207 59 255"
 		"ClassMenuDark"		"144 134 98 155"
 
 		"Yellow"			"251 206 60 255"
-		
+
 		"HudPanelForeground"		"123 110 59 184"
 		"HudPanelBackground"		"123 110 59 184"
 		"HudPanelBorder"			"255 255 255 102"
-		
+
 		"HudProgressBarActive"		"240 207 78 255"
 		"HudProgressBarInActive"	"140 120 73 255"
 		"HudProgressBarActiveLow"	"240 30 30 255"
-		"HudProgressBarInActiveLow"	"240 30 30 99"	
-		
+		"HudProgressBarInActiveLow"	"240 30 30 99"
+
 		"HudPanelObjectivesTimer"		"127 127 127 127"
 		"HudPanelObjectivesTimer_Flash"	"180 180 180 127"
-		
+
 		"HudAmmoCount"				"240 207 78 127"
-		
+
 		"HudHealthGreen"			"85 112 66 255"
 		"HudHealthYellow"			"240 207 78 255"
 		"HudHealthRed"				"180 20 20 255"
 		"HudHealthBG"				"170 150 73 255"
 		"HudHealthBorder"			"255 255 255 255"
-			
+
 		"HudBackground"					"123 110 59 184"
 		"HudBackgroundActive"			"240 207 78 117"
 		"HudBackgroundUnusable"			"192 28 0 140"
 		"HudBackgroundActiveSolid"		"240 207 78 180"
-		
+
 		"CommentaryBG"					"0 0 0 76"
-		
+
 		"Blank"				"0 0 0 0"
+
+		"ForTesting"		"255 0 0 32"
+		"ForTesting_Magenta"	"255 0 255 255"
+		"ForTesting_MagentaDim"	"255 0 255 120"
 	}
 
 	///////////////////// BASE SETTINGS ////////////////////////
@@ -79,13 +83,13 @@ Scheme
 		// vgui_controls color specifications
 		Border.Bright					"TransparentWhite"		// the lit side of a control
 		Border.Dark					"TransparentWhite"		// the dark/unlit side of a control
-		Border.Selection				"Blank"				// the additional border color for displaying the default/selected button		
+		Border.Selection				"Blank"				// the additional border color for displaying the default/selected button
 
 		Button.TextColor				"White"
 		Button.BgColor					"MoreTransparentWhite"
 		Button.ArmedTextColor			"White"
 		Button.ArmedBgColor				"TransparentWhite"
-		Button.DepressedTextColor		"Black"				
+		Button.DepressedTextColor		"Black"
 		Button.DepressedBgColor			"White"
 
 		CheckButton.TextColor			"Yellow"
@@ -161,7 +165,7 @@ Scheme
 		RichText.BgColor				"MoreTransparentWhite"
 		RichText.SelectedTextColor		"White"
 		RichText.SelectedBgColor		"MoreTransparentWhite"
-		
+
 		MapDescriptionText				"White"
 
 		ScrollBarButton.FgColor				"White"
@@ -252,49 +256,49 @@ Scheme
 
 		// Blank space to leave beneath the menu on the main screen
 		"Main.BottomBorder"	"32"
-		
+
 		// Hint message colors
 		"HintMessageFg"			"255 255 255 255"
 		"HintMessageBg" 		"0 0 0 60"
-		
+
 		// Hint message colors
 		"RoundStateFg"			"255 255 255 255"
 		"RoundStateBg" 			"0 0 0 60"
-		
+
 		HudObjectives.FgColor			"HudPanelForeground"
 		HudObjectives.BgColor			"HudPanelBackground"
 		HudObjectives.BorderColor		"HudPanelBorder"
-		
+
 		HudEventInfoCard.FgColor		"HudPanelForeground"
 		HudEventInfoCard.BgColor		"HudPanelBackground"
 		HudEventInfoCard.BorderColor	"HudPanelBorder"
-		
+
 		HudProgressBar.Active			"HudProgressBarActive"
 		HudProgressBar.InActive			"HudProgressBarInActive"
-		
+
 		HudStaminaBar.Active			"HudProgressBarActive"
-		HudStaminaBar.InActive			"HudProgressBarInActive"	
+		HudStaminaBar.InActive			"HudProgressBarInActive"
 		HudStaminaBar.ActiveLow			"HudProgressBarActiveLow"
-		HudStaminaBar.InActiveLow		"HudProgressBarInActiveLow"	
-	
+		HudStaminaBar.InActiveLow		"HudProgressBarInActiveLow"
+
 		HudStaminaIcon.Active			"HudProgressBarActive"
-		HudStaminaIcon.ActiveLow		"HudProgressBarActiveLow"	
-		
+		HudStaminaIcon.ActiveLow		"HudProgressBarActiveLow"
+
 		HudMGHeatBar.Active				"HudProgressBarActive"
-		HudMGHeatBar.InActive			"HudProgressBarInActive"	
+		HudMGHeatBar.InActive			"HudProgressBarInActive"
 		HudMGHeatBar.ActiveLow			"HudProgressBarActiveLow"
-		HudMGHeatBar.InActiveLow		"HudProgressBarInActiveLow"	
-	
+		HudMGHeatBar.InActiveLow		"HudProgressBarInActiveLow"
+
 		HudMGHeatIcon.Active			"HudProgressBarActive"
-		HudMGHeatIcon.ActiveLow			"HudProgressBarActiveLow"	
-		
+		HudMGHeatIcon.ActiveLow			"HudProgressBarActiveLow"
+
 		HudCaptureIcon.Active			"HudProgressBarActive"
 		HudCaptureIcon.InActive			"HudProgressBarInActive"
 		HudCaptureProgressBar.Active	"HudProgressBarActive"
 		HudCaptureProgressBar.InActive	"HudProgressBarInActive"
-		
+
 		HudFireSelectIcon.Active		"HudProgressBarActive"
-				
+
 		WeaponSelect.ActiveText			"240 207 78 255"
 		WeaponSelect.InactiveText		"White"
 		WeaponSelect.ActiveBox			"HudBackgroundActive"
@@ -302,6 +306,27 @@ Scheme
 		WeaponSelect.InactiveBox		"HudBackground"
 		WeaponSelect.InactiveBorder		"255 255 255 102"
 		WeaponSelect.NotUsable			"HudBackgroundUnusable"
+
+		// HL2MP HUD compatibility.
+		"FgColor_vrmode"	"255 220 0 200"
+		"BrightFg"		"255 220 0 255"
+		"DamagedBg"			"180 0 0 200"
+		"DamagedFg"			"180 0 0 230"
+		"BrightDamagedFg"		"255 0 0 255"
+		"ZoomReticleColor"	"255 220 0 255"
+		"Yellowish"			"255 160 0 255"
+		"Normal"			"255 208 64 255"
+		"Caution"			"255 48 0 255"
+		"SteamDeckLoadingBar"			"250 128 20 255"
+		"SteamDeckSpinner"				"201 100 0 255"
+		"SteamDeckLoadingText"			"181 179 175 255"
+		Chat.TypingText					"Orange"
+		"CT_Blue"			"153 204 255 255"
+		"T_Red"				"255 64 64 255"
+		"Hostage_Yellow"	"Panel.FgColor"
+		"HudIcon_Green"		"0 160 0 255"
+		"HudIcon_Red"		"160 0 0 255"
+		"ProgressBarFg"			"255 30 13 255"
 	}
 
 	//
@@ -373,7 +398,7 @@ Scheme
 				"weight"		"800"
 			}
 
-			
+
 		}
 		"DefaultUnderline"
 		{
@@ -608,12 +633,14 @@ Scheme
 		{
 			"1"
 			{
-				"name"		"Arial"
-				"tall"		"16"
+				"name"		"HalfLife2" [!$OSX]
+				"name"		"Helvetica Bold" [$OSX]
+				"tall"		"16"	[!$DECK]
+				"tall"		"26"	[$DECK]
 				"weight"	"1000"
 				"additive"	"1"
 				"antialias" "1"
-				"range"		"0x0000 0x017F"
+				"custom"	"1"
 			}
 		}
 
@@ -703,36 +730,36 @@ Scheme
 				"range"		"0x0000 0x017F" //	Basic Latin, Latin-1 Supplement, Latin Extended-A
 			}
 		}
-		
+
 		ClientTitleFont
 		{
 			"1"
 			{
-				"name"  "Day of Defeat Logo" 
+				"name"  "Day of Defeat Logo"
 				"tall"  "76"
 				"weight" "0"
 				"additive" "0"
 				"antialias" "1"
 			}
-		}	
+		}
 
 		ClientTitleFontSmall
 		{
 			"1"
 			{
-				"name"  "Day of Defeat Logo" 
+				"name"  "Day of Defeat Logo"
 				"tall"  "20"
 				"weight" "0"
 				"additive" "0"
 				"antialias" "1"
 			}
 		}
-		
+
 		ClientTitleFontPlayerIcons
 		{
 			"1"
 			{
-				"name"  "Day of Defeat Logo" 
+				"name"  "Day of Defeat Logo"
 				"tall"  "25"
 				"weight" "0"
 				"additive" "0"
@@ -754,27 +781,16 @@ Scheme
 		}
 
 		HudNumbers
-		// DIN-regular will be used at low res, DIN-light at all other sizes.
-		// note that these two fonts currently must have matching sizes ("tall")
 		{
 			"1"
 			{
-				"name"		"DIN-Regular"
-				"tall"		"32"
-				"weight"	"400"
-				"additive"	"1"
+				"name"		"HalfLife2"
+				"tall"		"32"	[!$DECK]
+				"tall"		"40"	[$DECK]
+				"weight"	"0"
 				"antialias" "1"
-				"yres"	"1 599"
-				"range"		"0x0000 0x017F"
-			}
-			"2"
-			{
-				"name"		"DIN-Light"
-				"tall"		"32"
-				"weight"	"1000"
 				"additive"	"1"
-				"antialias" "1"
-				"range"		"0x0000 0x017F"
+				"custom"	"1"
 			}
 		}
 		"CloseCaption_Normal"
@@ -930,8 +946,8 @@ Scheme
 				"yres"	"1200 10000"
 				"dropshadow"	"1"
 			}
-		}	
-		
+		}
+
 		MenuLargeFont
 		{
 			"1"
@@ -943,7 +959,7 @@ Scheme
 				"antialias"		"1"
 			}
 		}
-		
+
 		"TimerFontSmall"
 		{
 			"1"
@@ -1014,7 +1030,7 @@ Scheme
 				"additive"	"0"
 				"antialias" "1"
 			}
-		}		
+		}
 		// Used by scoreboard and spectator UI for names which don't map in the normal fashion
 		"DefaultVerySmallFallBack"
 		{
@@ -1043,6 +1059,548 @@ Scheme
 				"weight"	"0"
 				"range"		"0x0000 0x017F" //	Basic Latin, Latin-1 Supplement, Latin Extended-A
 				"yres"		"1200 6000"
+				"antialias"	"1"
+			}
+		}
+
+		"DebugFixed"
+		{
+			"1"
+			{
+				"name"		"Courier New"
+				"tall"		"14"
+				"weight"	"400"
+				"antialias" "1"
+			}
+		}
+		"DebugFixedSmall"
+		{
+			"1"
+			{
+				"name"		"Courier New"
+				"tall"		"14"
+				"weight"	"400"
+				"antialias" "1"
+			}
+		}
+		WeaponIcons
+		{
+			"1"
+			{
+				"name"		"HalfLife2"
+				"tall"		"70" [$DECK]
+				"tall"		"64"
+				"tall_hidef"	"58"
+				"weight"	"0"
+				"antialias" "1"
+				"additive"	"1"
+				"custom"	"1"
+			}
+		}
+		WeaponIconsSelected
+		{
+			"1"
+			{
+				"name"		"HalfLife2"
+				"tall"		"70" [$DECK]
+				"tall"		"64"
+				"tall_hidef"	"58"
+				"weight"	"0"
+				"antialias" "1"
+				"blur"		"5"
+				"scanlines"	"2"
+				"additive"	"1"
+				"custom"	"1"
+			}
+		}
+		WeaponIconsSmall
+		{
+			"1"
+			{
+				"name"		"HalfLife2"
+				"tall"		"36" [$DECK]
+				"tall"		"32"
+				"weight"	"0"
+				"antialias" "1"
+				"additive"	"1"
+				"custom"	"1"
+			}
+		}
+		WeaponIconsSmall_ABitSmaller
+		{
+			"1"
+			{
+				"name"		"HalfLife2"
+				"tall"		"34" [$DECK]
+				"tall"		"27"
+				"weight"	"0"
+				"antialias" "1"
+				"additive"	"1"
+				"custom"	"1"
+			}
+		}
+		WeaponIconsSmallSecondary
+		{
+			"1"
+			{
+				"name"		"HalfLife2"
+				"tall"		"34" [$DECK]
+				"tall"		"25"
+				"weight"	"0"
+				"antialias" "1"
+				"additive"	"1"
+				"custom"	"1"
+			}
+		}
+		FlashlightDeck
+		{
+			"1"
+			{
+				"name"		"HalfLife2"
+				"tall"		"46"
+				"weight"	"0"
+				"antialias" "1"
+				"additive"	"1"
+				"custom"	"1"
+			}
+		}
+		Crosshairs
+		{
+			"1"
+			{
+				"name"		"HalfLife2"
+				"tall"		"40" [!$OSX]
+				"tall"		"41" [$OSX]
+				"weight"	"0"
+				"antialias" "0"
+				"additive"	"1"
+				"custom"	"1"
+				"yres"		"1 1599" [!$DECK]
+				"yres"		"1 1439" [$DECK]
+			}
+			"2"
+			{
+				"name"		"HalfLife2"
+				"tall"		"80"
+				"weight"	"0"
+				"antialias" "1"
+				"additive"	"1"
+				"custom"	"1"
+				"yres"		"1600 3199" [!$DECK]
+				"yres"		"1440 3199" [$DECK]
+			}
+			"3"
+			{
+				"name"		"HalfLife2"
+				"tall"		"120"
+				"weight"	"0"
+				"antialias" "1"
+				"additive"	"1"
+				"custom"	"1"
+				"yres"		"3200 4799"
+			}
+			"4"
+			{
+				"name"		"HalfLife2"
+				"tall"		"17"
+				"weight"	"0"
+				"antialias" "1"
+				"additive"	"1"
+				"custom"	"1"
+			}
+		}
+		QuickInfo
+		{
+			"1"
+			{
+				"name"		"HL2cross"
+				"tall"		"36" [$DECK]
+				"tall"		"28" [!$OSX]
+				"tall"		"50" [$OSX]
+				"weight"	"0"
+				"antialias" "1"
+				"additive"	"1"
+				"custom"	"1" [!$OSX]
+			}
+		}
+		HudNumbersGlow
+		{
+			"1"
+			{
+				"name"		"HalfLife2"
+				"tall"		"32"	[!$DECK]
+				"tall"		"40"	[$DECK]
+				"weight"	"0"
+				"blur"		"4"
+				"scanlines" "2"
+				"antialias" "1"
+				"additive"	"1"
+				"custom"	"1"
+			}
+		}
+		HudHintTextLarge
+		{
+			"1"	[$WIN32]
+			{
+				"name"		"GorDIN"
+				"tall"		"22" [$DECK]
+				"tall"		"15"
+				"weight"	"700"
+				"antialias" "1"
+				"additive"	"1"
+			}
+		}
+		HudHintTextSmall
+		{
+			"1"	[$WIN32]
+			{
+				"name"		"GorDIN"
+				"tall"		"18" [$DECK]
+				"tall"		"13"
+				"weight"	"0"
+				"antialias" "1"
+				"additive"	"1"
+			}
+		}
+		GameUIButtons
+		{
+			"1"	[$X360]
+			{
+				"bitmap"	"1"
+				"name"		"Buttons"
+				"scalex"	"0.63"
+				"scaley"	"0.63"
+				"scalex_hidef"	"1.0"
+				"scaley_hidef"	"1.0"
+			}
+		}
+		"CloseCaption_Small"
+		{
+			"1"
+			{
+				"name"		"GorDIN"
+				"tall"		"15" [$DECK]
+				"tall"		"12"
+				"weight"	"600"
+				"antialias"	"1"
+			}
+		}
+		"HudNumbersTimer"
+		{
+			"1"
+			{
+				"name"		"GorDIN"
+				"tall"		"15"
+				"weight"	"0"
+				"antialias" "1"
+				"additive"	"1"
+			}
+		}
+		"HL2MPTypeDeath"
+		{
+		   "1"
+		   {
+				"name"  "HL2MP" // csd.ttf
+				"tall"  "32"
+				"weight" "0"
+				"additive" "1"
+				"antialias" "1"
+				"custom" "1" [$OSX]
+		   }
+		}
+		CreditsLogo
+		{
+			"1"
+			{
+				"name"		"HalfLife2"
+				"tall"		"34"
+				"weight"	"0"
+				"antialias" "1"
+				"additive"	"1"
+				"custom"	"1"
+			}
+		}
+		CreditsIcons
+		{
+			"1"
+			{
+				"name"		"HalfLife2"
+				"tall"		"34"
+				"weight"	"0"
+				"antialias" "1"
+				"additive"	"1"
+				"custom"	"1"
+			}
+		}
+		CreditsText
+		{
+			"1"
+			{
+				"name"		"Trebuchet MS"
+				"tall"		"20"
+				"weight"	"900"
+				"antialias" "1"
+				"additive"	"1"
+				"yres"	"480 899"
+			}
+			"2"
+			{
+				"name"		"Trebuchet MS"
+				"tall"		"12"
+				"weight"	"900"
+				"antialias" "1"
+				"additive"	"1"
+			}
+		}
+		CreditsOutroLogos
+		{
+			"1"
+			{
+				"name"		"HalfLife2"
+				"tall"		"34"
+				"weight"	"0"
+				"antialias" "1"
+				"additive"	"1"
+				"custom"	"1"
+			}
+		}
+		CreditsOutroValve
+		{
+			"1"
+			{
+				"name"		"HalfLife2"
+				"tall"		"48"
+				"weight"	"0"
+				"antialias" "1"
+				"additive"	"1"
+				"custom"	"1"
+			}
+		}
+		CreditsOutroText
+		{
+			"1"
+			{
+				"name"		"Verdana" [!$OSX]
+				"name"		"Courier Bold" [$OSX]
+				"tall"		"16"
+				"weight"	"900"
+				"antialias" "1"
+			}
+		}
+		CenterPrintText
+		{
+			// note that this scales with the screen resolution
+			"1"
+			{
+				"name"		"GorDIN"
+				"tall"		"18"
+				"weight"	"700"
+				"antialias" "1"
+				"additive"	"1"
+			}
+		}
+		HDRDemoText
+		{
+			// note that this scales with the screen resolution
+			"1"
+			{
+				"name"		"Trebuchet MS"
+				"tall"		"24"
+				"weight"	"900"
+				"antialias" "1"
+				"additive"	"1"
+			}
+		}
+		"AchievementNotification"
+		{
+			"1"
+			{
+				"name"		"GorDIN"
+				"tall"		"14"
+				"weight"	"900"
+				"antialias" "1"
+			}
+		}
+		"CommentaryDefault"
+		{
+			"1"
+			{
+				"name"		"GorDIN"
+				"tall"		"12"
+				"weight"	"700"
+				"yres"	"480 599"
+				"antialias" "1"
+			}
+			"2"
+			{
+				"name"		"GorDIN"
+				"tall"		"13"	[$WIN32]
+				"tall"		"20"	[$X360]
+				"weight"	"700"
+				"yres"	"600 767"
+				"antialias" "1"
+			}
+			"3"
+			{
+				"name"		"GorDIN"
+				"tall"		"14"
+				"weight"	"700"
+				"yres"	"768 1023"
+				"antialias"	"1"
+			}
+			"4"
+			{
+				"name"		"GorDIN"
+				"tall"		"20"
+				"weight"	"700"
+				"yres"	"1024 1199"
+				"antialias"	"1"
+			}
+			"6" // Proportional
+			{
+				"name"		"GorDIN"
+				"tall"		"10"
+				"weight"	"700"
+				"antialias" "1"
+			}
+
+		}
+		"SteamDeckLoadingText"
+		{
+			"7"
+			{
+				"name"		"GorDIN"
+				"tall"		"24"
+				"weight"	"700"
+				"antialias" "1"
+			}
+		}
+		"PDump"
+		{
+			"1"
+			{
+				"name"		"GorDIN"
+				"tall"		"24"
+				"weight"	"400"
+				"yres"	"480 599"
+				"antialias" "1"
+			}
+			"2"
+			{
+				"name"		"GorDIN"
+				"tall"		"24"
+				"weight"	"400"
+				"yres"	"600 767"
+				"antialias" "1"
+			}
+			"3"
+			{
+				"name"		"GorDIN"
+				"tall"		"24"
+				"weight"	"400"
+				"yres"	"768 1023"
+				"antialias"	"1"
+			}
+			"4"
+			{
+				"name"		"GorDIN"
+				"tall"		"24"
+				"weight"	"400"
+				"yres"	"1024 1199"
+				"antialias"	"1"
+			}
+			"5"
+			{
+				"name"		"GorDIN"
+				"tall"		"40"
+				"weight"	"400"
+				"yres"	"1200 10000"
+				"antialias"	"1"
+			}
+		}
+		"PDumpSmall"
+		{
+			"1"
+			{
+				"name"		"GorDIN"
+				"tall"		"12"
+				"weight"	"400"
+				"yres"	"480 599"
+				"antialias" "1"
+			}
+			"2"
+			{
+				"name"		"GorDIN"
+				"tall"		"14"
+				"weight"	"400"
+				"yres"	"600 767"
+				"antialias" "1"
+			}
+			"3"
+			{
+				"name"		"GorDIN"
+				"tall"		"18"
+				"weight"	"400"
+				"yres"	"768 1023"
+				"antialias"	"1"
+			}
+			"4"
+			{
+				"name"		"GorDIN"
+				"tall"		"20"
+				"weight"	"400"
+				"yres"	"1024 1199"
+				"antialias"	"1"
+			}
+			"5"
+			{
+				"name"		"GorDIN"
+				"tall"		"35"
+				"weight"	"400"
+				"yres"	"1200 10000"
+				"antialias"	"1"
+			}
+		}
+		"PDumpVerySmall"
+		{
+			"1"
+			{
+				"name"		"GorDIN"
+				"tall"		"14"
+				"weight"	"400"
+				"yres"	"480 599"
+				"antialias" "1"
+			}
+			"2"
+			{
+				"name"		"GorDIN"
+				"tall"		"15"
+				"weight"	"400"
+				"yres"	"600 767"
+				"antialias" "1"
+			}
+			"3"
+			{
+				"name"		"GorDIN"
+				"tall"		"16"
+				"weight"	"400"
+				"yres"	"768 1023"
+				"antialias"	"1"
+			}
+			"4"
+			{
+				"name"		"GorDIN"
+				"tall"		"20"
+				"weight"	"400"
+				"yres"	"1024 1199"
+				"antialias"	"1"
+			}
+			"5"
+			{
+				"name"		"GorDIN"
+				"tall"		"30"
+				"weight"	"400"
+				"yres"	"1200 10000"
 				"antialias"	"1"
 			}
 		}
@@ -1093,7 +1651,7 @@ Scheme
 				}
 			}
 		}
-		
+
 		BaseBorder
 		{
 			"inset" "0 0 1 1"
@@ -1133,7 +1691,7 @@ Scheme
 				}
 			}
 		}
-		
+
 		TitleButtonBorder
 		{
 			"inset" "0 0 1 1"
@@ -1332,7 +1890,7 @@ Scheme
 				}
 			}
 		}
-		
+
 		ButtonBorder
 		{
 			"inset" "0 0 0 0"
@@ -1741,5 +2299,28 @@ Scheme
 	CustomFontFiles
 	{
 		"1"		"resource/DODlogo.ttf"
+
+		// HL2MP HUD compatibility.
+		"2" "resource/HALFLIFE2.ttf"
+		"3" "resource/HL2crosshairs.ttf"
+		"4" "resource/HL2MP.ttf"
+		"5" "resource/linux_fonts/DejaVuSans.ttf"
+		"6" "resource/linux_fonts/DejaVuSans-Bold.ttf"
+		"7" "resource/linux_fonts/DejaVuSans-BoldOblique.ttf"
+		"8" "resource/linux_fonts/DejaVuSans-Oblique.ttf"
+		"9" "resource/linux_fonts/LiberationSans-Regular.ttf"
+		"10" "resource/linux_fonts/LiberationSans-Bold.ttf"
+		"11" "resource/linux_fonts/LiberationMono-Regular.ttf"
+		"12" "resource/GorDIN-Regular.ttf"
+		"13" "resource/GorDIN-Bold.ttf"
+		"14" "resource/GorDIN-Semibold.ttf"
+		"15" "resource/GorDIN-Black.ttf"
+		"16" "resource/GorDIN-Light.ttf"
+	}
+
+	BitmapFontFiles
+	{
+		// UI buttons, custom font, (256x64)
+		"Buttons"		"materials/vgui/fonts/buttons_32.vbf"
 	}
 }

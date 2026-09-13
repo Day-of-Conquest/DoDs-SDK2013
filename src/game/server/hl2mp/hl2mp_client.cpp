@@ -72,7 +72,12 @@ void FinishClientPutInServer( CHL2MP_Player *pPlayer )
 	data->SetString( "msg",	"motd" );		// use this stringtable entry
 	data->SetBool( "unload", sv_motd_unload_on_dismissal.GetBool() );
 
+#ifdef DODS_REMAKE
+	if ( !pPlayer->IsFakeClient() )
+		pPlayer->ShowViewPortPanel( PANEL_TEAM, true );
+#else
 	pPlayer->ShowViewPortPanel( PANEL_INFO, true, data );
+#endif
 
 	data->deleteThis();
 }
