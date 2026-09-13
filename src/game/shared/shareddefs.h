@@ -124,7 +124,11 @@ public:
 
 #define WEAPON_NOCLIP			-1	// clip sizes set to this tell the weapon it doesn't use a clip
 
-#define	MAX_AMMO_TYPES	32		// ???
+#if defined( DODS_REMAKE ) && defined( HL2MP )
+#define MAX_AMMO_TYPES 64 // HL2MP plus DoC ammo, including the unused zero slot.
+#else
+#define MAX_AMMO_TYPES 32
+#endif
 #define MAX_AMMO_SLOTS  32		// not really slots
 
 #define HUD_PRINTNOTIFY		1

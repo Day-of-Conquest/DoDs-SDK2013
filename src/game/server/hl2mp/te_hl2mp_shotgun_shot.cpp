@@ -60,7 +60,11 @@ CTEHL2MPFireBullets::~CTEHL2MPFireBullets( void )
 IMPLEMENT_SERVERCLASS_ST_NOBASE(CTEHL2MPFireBullets, DT_TEHL2MPFireBullets)
 	SendPropVector( SENDINFO(m_vecOrigin), -1, SPROP_COORD ),
 	SendPropVector( SENDINFO(m_vecDir), -1 ),
+#ifdef DODS_REMAKE
+	SendPropInt( SENDINFO( m_iAmmoID ), 6, SPROP_UNSIGNED ),
+#else
 	SendPropInt( SENDINFO( m_iAmmoID ), 5, SPROP_UNSIGNED ),
+#endif
 	SendPropInt( SENDINFO( m_iSeed ), NUM_BULLET_SEED_BITS, SPROP_UNSIGNED ),
 	SendPropInt( SENDINFO( m_iShots ), 5, SPROP_UNSIGNED ),
 	SendPropInt( SENDINFO( m_iPlayer ), 6, SPROP_UNSIGNED ), 	// max 64 players, see MAX_PLAYERS

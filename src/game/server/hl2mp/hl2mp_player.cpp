@@ -302,6 +302,7 @@ void CHL2MP_Player::GiveDefaultItems( void )
 	GiveNamedItem( "weapon_physcannon" );
 #else
 	GiveNamedItem("weapon_colt");
+	GiveNamedItem("weapon_garand");
 #endif // !DODS_REMAKE
 
 
