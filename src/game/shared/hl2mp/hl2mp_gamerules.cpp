@@ -112,6 +112,10 @@ static const char *s_PreserveEnts[] =
 	"info_player_deathmatch",
 	"info_player_combine",
 	"info_player_rebel",
+#ifdef DODS_REMAKE
+	"info_player_allies",
+	"info_player_axis",
+#endif
 	"info_map_parameters",
 	"keyframe_rope",
 	"move_rope",
@@ -176,8 +180,13 @@ char *sTeamNames[] =
 {
 	"Unassigned",
 	"Spectator",
+#ifdef DODS_REMAKE
+	"Americans",
+	"Germans",
+#else
 	"Combine",
 	"Rebels",
+#endif
 };
 
 CHL2MPRules::CHL2MPRules()
@@ -192,7 +201,11 @@ CHL2MPRules::CHL2MPRules()
 		g_Teams.AddToTail( pTeam );
 	}
 
+#ifdef DODS_REMAKE
+	m_bTeamPlayEnabled = true;
+#else
 	m_bTeamPlayEnabled = teamplay.GetBool();
+#endif
 	m_flIntermissionEndTime = 0.0f;
 	m_flGameStartTime = 0;
 
@@ -796,6 +809,9 @@ void CHL2MPRules::ClientSettingsChanged( CBasePlayer *pPlayer )
 		}
 		else
 		{
+#ifdef DODS_REMAKE
+			pHL2Player->SetPlayerTeamModel();
+#else
 			if ( Q_stristr( szModelName, "models/human") )
 			{
 				pHL2Player->ChangeTeam( TEAM_REBELS );
@@ -804,6 +820,7 @@ void CHL2MPRules::ClientSettingsChanged( CBasePlayer *pPlayer )
 			{
 				pHL2Player->ChangeTeam( TEAM_COMBINE );
 			}
+#endif
 		}
 	}
 	if ( sv_report_client_settings.GetInt() == 1 )

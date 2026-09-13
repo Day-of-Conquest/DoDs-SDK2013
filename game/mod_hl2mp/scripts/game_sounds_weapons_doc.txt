@@ -1,0 +1,9 @@
+//Grease
+"Weapon_Greasegun.Shoot"
+{
+	"channel"		"CHAN_WEAPON"
+	"volume"		"1.0"
+	"soundlevel"	"SNDLVL_150dB"
+	"pitch"		"PITCH_NORM"
+	"wave"		"^weapons/greasegun_shoot.wav"
+}

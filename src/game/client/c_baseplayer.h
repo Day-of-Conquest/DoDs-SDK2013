@@ -576,6 +576,11 @@ private:
 	friend class CDODGameMovement;
 	friend class CPortalGameMovement;
 	
+#ifdef DODS_REMAKE
+	friend class CDODSGameMovement;
+#endif // DODS_REMAKE
+
+
 	// Accessors for gamemovement
 	float GetStepSize( void ) const { return m_Local.m_flStepSize; }
 

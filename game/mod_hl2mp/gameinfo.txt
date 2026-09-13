@@ -1,6 +1,6 @@
 "GameInfo"
 {
-	game	"My First HL2MP Mod"
+	game	"DoC: Remade"
 	title	"HALF+LIFE'"
 	title2	"deathmatch"
 	type multiplayer_only
@@ -56,6 +56,12 @@
 			// VPK and we can avoid making thousands of file system calls to attempt to open files
 			// in folders where they don't exist.  (Searching a VPK is much faster than making an operating
 			// system call.)
+			
+			game+mod				"|appid_300|dod\dod_english.vpk"
+			game+mod				"|appid_300|dod\dod_pak.vpk"
+			game+mod				"|appid_300|dod"
+			
+			
 			game+mod			|appid_243750|hl2mp/hl2mp_english.vpk
 			game+mod			|appid_243750|hl2mp/hl2mp_pak.vpk
 

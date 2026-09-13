@@ -1,0 +1,13 @@
+// overview description file for dod_colmar
+
+"dod_colmar"
+{
+	"material"	"overviews/rain_test"	
+	"pos_x"		"-1145"	
+	"pos_y"		"1491"	
+	"scale"		"2" 	
+	"rotate"		"0"	
+	//"zoom"		"1.2"	
+}
+
+

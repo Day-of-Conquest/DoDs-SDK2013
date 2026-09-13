@@ -63,6 +63,11 @@ public:
 	QAngle GetAnimEyeAngles( void ) { return m_angEyeAngles; }
 	Vector GetAttackSpread( CBaseCombatWeapon *pWeapon, CBaseEntity *pTarget = NULL );
 
+#ifdef DODS_REMAKE
+	bool				IsCrawling(void) const;
+	bool				SetCrawling(bool bCrawling, bool bNoAnimation);
+#endif
+
 
 	// Should this object cast shadows?
 	virtual ShadowType_t		ShadowCastType( void );
@@ -125,6 +130,10 @@ private:
 	C_HL2MP_Player( const C_HL2MP_Player & );
 
 	CPlayerAnimState m_PlayerAnimState;
+
+#ifdef DODS_REMAKE
+	CNetworkVar( bool, m_bCrawling);
+#endif
 
 	QAngle	m_angEyeAngles;
 

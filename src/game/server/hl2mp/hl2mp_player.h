@@ -53,6 +53,11 @@ public:
 	DECLARE_DATADESC();
 	DECLARE_ENT_SCRIPTDESC();
 
+#ifdef DODS_REMAKE
+	bool				IsCrawling(void) const;
+	bool				SetCrawling(bool bCrawling, bool bNoAnimation);
+#endif
+
 	virtual void Precache( void );
 	virtual void Spawn( void );
 	virtual void PostThink( void );
@@ -144,6 +149,10 @@ public:
 	bool IsThreatAimingTowardMe( CBaseEntity* threat, float cosTolerance = 0.8f ) const;
 	bool IsThreatFiringAtMe( CBaseEntity* threat ) const;
 private:
+
+#ifdef DODS_REMAKE
+	CNetworkVar(bool, m_bCrawling);
+#endif
 
 	CNetworkQAngle( m_angEyeAngles );
 	CPlayerAnimState   m_PlayerAnimState;

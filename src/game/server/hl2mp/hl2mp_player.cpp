@@ -46,6 +46,37 @@ LINK_ENTITY_TO_CLASS( player, CHL2MP_Player );
 LINK_ENTITY_TO_CLASS( info_player_combine, CPointEntity );
 LINK_ENTITY_TO_CLASS( info_player_rebel, CPointEntity );
 
+#ifdef DODS_REMAKE
+class CDODSPlayerSpawn : public CPointEntity
+{
+public:
+	DECLARE_CLASS( CDODSPlayerSpawn, CPointEntity );
+	DECLARE_DATADESC();
+	CDODSPlayerSpawn() : m_bDisabled( false ) {}
+
+	virtual bool IsTriggered( CBaseEntity *pActivator ) OVERRIDE
+	{
+		const int team = FClassnameIs( this, "info_player_allies" ) ? TEAM_AMERICANS : TEAM_GERMANS;
+		return !m_bDisabled && pActivator && pActivator->GetTeamNumber() == team;
+	}
+
+	void InputEnable( inputdata_t &inputdata ) { m_bDisabled = false; }
+	void InputDisable( inputdata_t &inputdata ) { m_bDisabled = true; }
+
+private:
+	bool m_bDisabled;
+};
+
+LINK_ENTITY_TO_CLASS( info_player_allies, CDODSPlayerSpawn );
+LINK_ENTITY_TO_CLASS( info_player_axis, CDODSPlayerSpawn );
+
+BEGIN_DATADESC( CDODSPlayerSpawn )
+	DEFINE_KEYFIELD( m_bDisabled, FIELD_BOOLEAN, "StartDisabled" ),
+	DEFINE_INPUTFUNC( FIELD_VOID, "Enable", InputEnable ),
+	DEFINE_INPUTFUNC( FIELD_VOID, "Disable", InputDisable ),
+END_DATADESC()
+#endif
+
 // specific to the local player
 BEGIN_SEND_TABLE_NOBASE( CHL2MP_Player, DT_HL2MPLocalPlayerExclusive )
 	// send a hi-res origin to the local player for use in prediction
@@ -69,6 +100,9 @@ BEGIN_SEND_TABLE_NOBASE( CHL2MP_Player, DT_HL2MPNonLocalPlayerExclusive )
 END_SEND_TABLE()
 
 IMPLEMENT_SERVERCLASS_ST(CHL2MP_Player, DT_HL2MP_Player)
+#ifdef DODS_REMAKE
+	SendPropBool( SENDINFO( m_bCrawling ) ),
+#endif
 	SendPropExclude( "DT_BaseEntity", "m_vecOrigin" ),
 
 	// misyl:
@@ -155,7 +189,11 @@ CHL2MP_Player::CHL2MP_Player() : m_PlayerAnimState( this )
 	m_bReady = false;
 
 	BaseClass::ChangeTeam( 0 );
-	
+
+#ifdef DODS_REMAKE
+	SetCrawling(false, true);
+#endif
+
 	//UseClientSideAnimation();
 }
 
@@ -332,6 +370,9 @@ void CHL2MP_Player::PickDefaultSpawnTeam( void )
 //-----------------------------------------------------------------------------
 void CHL2MP_Player::Spawn(void)
 {
+#ifdef DODS_REMAKE
+	SetCrawling( false, true );
+#endif
 	m_flNextModelChangeTime = 0.0f;
 	m_flNextTeamChangeTime = 0.0f;
 
@@ -1010,6 +1051,19 @@ void CHL2MP_Player::ChangeTeam( int iTeam )
 
 bool CHL2MP_Player::HandleCommand_JoinTeam( int team )
 {
+#ifdef DODS_REMAKE
+	if ( team == TEAM_UNASSIGNED )
+	{
+		CTeam *pAmericans = GetGlobalTeam( TEAM_AMERICANS );
+		CTeam *pGermans = GetGlobalTeam( TEAM_GERMANS );
+		if ( !pAmericans || !pGermans )
+			return false;
+		const int americans = pAmericans->GetNumPlayers() - ( GetTeamNumber() == TEAM_AMERICANS ? 1 : 0 );
+		const int germans = pGermans->GetNumPlayers() - ( GetTeamNumber() == TEAM_GERMANS ? 1 : 0 );
+		team = americans == germans ? random->RandomInt( TEAM_AMERICANS, TEAM_GERMANS ) :
+			( americans < germans ? TEAM_AMERICANS : TEAM_GERMANS );
+	}
+#endif
 	if ( !GetGlobalTeam( team ) || team == 0 )
 	{
 		Warning( "HandleCommand_JoinTeam( %d ) - invalid team index.\n", team );
@@ -1399,11 +1453,19 @@ CBaseEntity* CHL2MP_Player::EntSelectSpawnPoint( void )
 		if ( GetTeamNumber() == TEAM_COMBINE )
 		{
 			pSpawnpointName = "info_player_combine";
+#ifdef DODS_REMAKE
+			if ( gEntList.FindEntityByClassname( NULL, "info_player_allies" ) )
+				pSpawnpointName = "info_player_allies";
+#endif
 			pLastSpawnPoint = g_pLastCombineSpawn;
 		}
 		else if ( GetTeamNumber() == TEAM_REBELS )
 		{
 			pSpawnpointName = "info_player_rebel";
+#ifdef DODS_REMAKE
+			if ( gEntList.FindEntityByClassname( NULL, "info_player_axis" ) )
+				pSpawnpointName = "info_player_axis";
+#endif
 			pLastSpawnPoint = g_pLastRebelSpawn;
 		}
 
@@ -1430,11 +1492,13 @@ CBaseEntity* CHL2MP_Player::EntSelectSpawnPoint( void )
 			// check if pSpot is valid
 			if ( g_pGameRules->IsSpawnPointValid( pSpot, this ) )
 			{
+#ifndef DODS_REMAKE
 				if ( pSpot->GetLocalOrigin() == vec3_origin )
 				{
 					pSpot = gEntList.FindEntityByClassname( pSpot, pSpawnpointName );
 					continue;
 				}
+#endif
 
 				// if so, go to pSpot
 				goto ReturnSpot;
@@ -1443,6 +1507,15 @@ CBaseEntity* CHL2MP_Player::EntSelectSpawnPoint( void )
 		// increment pSpot
 		pSpot = gEntList.FindEntityByClassname( pSpot, pSpawnpointName );
 	} while ( pSpot != pFirstSpot ); // loop if we're not back to the start
+
+#ifdef DODS_REMAKE
+	pSpot = NULL;
+	while ( ( pSpot = gEntList.FindEntityByClassname( pSpot, pSpawnpointName ) ) != NULL )
+	{
+		if ( pSpot->IsTriggered( this ) )
+			break;
+	}
+#endif
 
 	// we haven't found a place to spawn yet,  so kill any guy at the first spawn point and spawn there
 	if ( pSpot )

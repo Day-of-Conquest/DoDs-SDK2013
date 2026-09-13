@@ -1173,7 +1173,10 @@ protected:
 	friend class CHL2GameMovement;
 	friend class CDODGameMovement;
 	friend class CPortalGameMovement;
-	
+#ifdef DODS_REMAKE
+	friend class CDODSGameMovement;
+#endif // DODS_REMAKE
+
 	// Accessors for gamemovement
 	bool IsDucked( void ) const { return m_Local.m_bDucked; }
 	bool IsDucking( void ) const { return m_Local.m_bDucking; }

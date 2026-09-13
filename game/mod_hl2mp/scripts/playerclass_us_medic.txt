@@ -1,0 +1,30 @@
+PlayerClassDatafile
+{
+	// FilePLayerClassInfo_t members
+	"printname"			"Medic"	
+	"playermodel"		"models/player/american_assault.mdl"
+	"selectcmd"			"cls_medic"
+
+	// CDODPlayerClassInfo members
+
+	// What team has this class, for verification
+	"team"				"ALLIES"
+
+	// Weapon Info
+	"primaryweapon"			"trenchgun"
+	"secondaryweapon"		"colt"
+	"meleeweapon"			"medkit"
+	"grenadetype"			"smoke_ger"
+	"numgrens2"				"3"
+	
+	// Model Info
+	"helmetgroup"		"0"
+	"hairgroup"			"1"
+
+	"drophelmet"		"HELMET_ALLIES"
+
+	"limitcvar"			"mp_limit_allies_assault"
+
+	"healthimage"		"cls_us_thompson_active"
+	"healthimagebg"		"cls_us_thompson_active_bg"
+}

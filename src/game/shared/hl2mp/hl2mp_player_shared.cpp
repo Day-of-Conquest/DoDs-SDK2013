@@ -20,6 +20,19 @@
 
 extern ConVar sv_footsteps;
 
+#ifdef DODS_REMAKE
+bool CHL2MP_Player::IsCrawling( void ) const
+{
+	return m_bCrawling;
+}
+
+bool CHL2MP_Player::SetCrawling( bool bCrawling, bool bNoAnimation )
+{
+	m_bCrawling = bCrawling;
+	return true;
+}
+#endif
+
 const char *g_ppszPlayerSoundPrefixNames[PLAYER_SOUNDS_MAX] =
 {
 	"NPC_Citizen",
