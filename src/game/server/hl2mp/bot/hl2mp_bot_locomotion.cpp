@@ -89,6 +89,13 @@ bool CHL2MPBotLocomotion::IsAreaTraversable( const CNavArea* area ) const
 //-----------------------------------------------------------------------------------------
 bool CHL2MPBotLocomotion::IsEntityTraversable( CBaseEntity* obstacle, TraverseWhenType when ) const
 {
+#ifdef DODS_REMAKE
+	if ( obstacle && ( FClassnameIs( obstacle, "func_teamblocker" ) || FClassnameIs( obstacle, "func_team_wall" ) ) )
+	{
+		CHL2MPBot *me = static_cast<CHL2MPBot *>( GetBot()->GetEntity() );
+		return !obstacle->ShouldCollide( COLLISION_GROUP_PLAYER_MOVEMENT, me->PlayerSolidMask() );
+	}
+#endif
 	// assume all players are "traversable" in that they will move or can be killed
 	if ( obstacle && obstacle->IsPlayer() )
 	{

@@ -214,6 +214,10 @@ CHL2MPRules::CHL2MPRules()
 	m_hRespawnableItemsAndWeapons.RemoveAll();
 	m_tmNextPeriodicThink = 0;
 	m_flRestartGameTime = 0;
+#ifdef DODS_REMAKE
+	m_iDODSRoundWinner = 0;
+	m_flDODSRoundRestart = 0;
+#endif
 	m_bCompleteReset = false;
 	m_bHeardAllPlayersReady = false;
 	m_bAwaitingReadyRestart = false;
@@ -362,6 +366,13 @@ void CHL2MPRules::Think( void )
 		}
 	}
 
+#ifdef DODS_REMAKE
+	if ( IsDODSRoundOver() )
+	{
+		if ( gpGlobals->curtime >= m_flDODSRoundRestart ) RestartGame();
+		return;
+	}
+#endif
 	if ( gpGlobals->curtime > m_tmNextPeriodicThink )
 	{		
 		CheckAllPlayersReady();
@@ -929,6 +940,11 @@ bool CHL2MPRules::ShouldCollide( int collisionGroup0, int collisionGroup1 )
 		V_swap(collisionGroup0,collisionGroup1);
 	}
 
+#ifdef DODS_REMAKE
+	if ( collisionGroup0 == COLLISION_GROUP_PLAYER &&
+		( collisionGroup1 == COLLISION_GROUP_PLAYER || collisionGroup1 == COLLISION_GROUP_PLAYER_MOVEMENT ) )
+		return true;
+#endif
 	if ( (collisionGroup0 == COLLISION_GROUP_PLAYER || collisionGroup0 == COLLISION_GROUP_PLAYER_MOVEMENT) &&
 		collisionGroup1 == COLLISION_GROUP_WEAPON )
 	{
@@ -1048,6 +1064,26 @@ CAmmoDef *GetAmmoDef()
 
 #ifndef CLIENT_DLL
 
+#ifdef DODS_REMAKE
+void CHL2MPRules::EndDODSRound( int team )
+{
+	if ( g_fGameOver || IsDODSRoundOver() || ( team != TEAM_AMERICANS && team != TEAM_GERMANS ) ) return;
+	m_iDODSRoundWinner = team;
+	m_flDODSRoundRestart = gpGlobals->curtime + 7.0f;
+	if ( GetGlobalTeam( team ) ) GetGlobalTeam( team )->AddScore( 1 );
+	const char *message = team == TEAM_AMERICANS ? "Americans win! All objectives captured." : "Germans win! All objectives captured.";
+	UTIL_ClientPrintAll( HUD_PRINTCENTER, message );
+	UTIL_ClientPrintAll( HUD_PRINTTALK, message );
+	for ( int i = 1; i <= gpGlobals->maxClients; ++i )
+	{
+		CBasePlayer *player = UTIL_PlayerByIndex( i );
+		if ( !player ) continue;
+		player->AddFlag( FL_FROZEN );
+		player->ShowViewPortPanel( PANEL_SCOREBOARD, true );
+	}
+}
+#endif
+
 void CHL2MPRules::RestartGame()
 {
 	// bounds check
@@ -1055,6 +1091,10 @@ void CHL2MPRules::RestartGame()
 	{
 		mp_timelimit.SetValue( 0 );
 	}
+#ifdef DODS_REMAKE
+	const bool nextRound = IsDODSRoundOver();
+	if ( !nextRound )
+#endif
 	m_flGameStartTime = gpGlobals->curtime;
 	if ( !IsFinite( m_flGameStartTime.Get() ) )
 	{
@@ -1078,7 +1118,13 @@ void CHL2MPRules::RestartGame()
 		}
 		pPlayer->RemoveAllItems( true );
 		respawn( pPlayer, false );
+#ifdef DODS_REMAKE
+		pPlayer->RemoveFlag( FL_FROZEN );
+		pPlayer->ShowViewPortPanel( PANEL_SCOREBOARD, false );
+		if ( !nextRound ) pPlayer->Reset();
+#else
 		pPlayer->Reset();
+#endif
 	}
 
 	// Respawn entities (glass, doors, etc..)
@@ -1086,16 +1132,28 @@ void CHL2MPRules::RestartGame()
 	CTeam *pRebels = GetGlobalTeam( TEAM_REBELS );
 	CTeam *pCombine = GetGlobalTeam( TEAM_COMBINE );
 
-	if ( pRebels )
+	if ( pRebels
+#ifdef DODS_REMAKE
+		&& !nextRound
+#endif
+	)
 	{
 		pRebels->SetScore( 0 );
 	}
 
-	if ( pCombine )
+	if ( pCombine
+#ifdef DODS_REMAKE
+		&& !nextRound
+#endif
+	)
 	{
 		pCombine->SetScore( 0 );
 	}
 
+#ifdef DODS_REMAKE
+	m_iDODSRoundWinner = 0;
+	m_flDODSRoundRestart = 0;
+#endif
 	m_flIntermissionEndTime = 0;
 	m_flRestartGameTime = 0.0;		
 	m_bCompleteReset = false;
@@ -1106,7 +1164,11 @@ void CHL2MPRules::RestartGame()
 		event->SetInt("fraglimit", 0 );
 		event->SetInt( "priority", 6 ); // HLTV event priority, not transmitted
 
+#ifdef DODS_REMAKE
+		event->SetString( "objective", "CAPTURE" );
+#else
 		event->SetString("objective","DEATHMATCH");
+#endif
 
 		gameeventmanager->FireEvent( event );
 	}

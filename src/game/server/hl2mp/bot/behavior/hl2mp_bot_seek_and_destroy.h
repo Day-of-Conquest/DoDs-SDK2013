@@ -35,6 +35,13 @@ public:
 	virtual const char *GetName( void ) const	{ return "SeekAndDestroy"; };
 
 private:
+#ifdef DODS_REMAKE
+	EHANDLE m_dodsGoal;
+	CUtlVector<EHANDLE> m_dodsFailedGoals;
+	CountdownTimer m_dodsRepath;
+	CountdownTimer m_dodsSelect;
+	CountdownTimer m_dodsRetry;
+#endif
 	PathFollower m_path;
 	CountdownTimer m_repathTimer;
 	CountdownTimer m_itemStolenTimer;

@@ -45,7 +45,7 @@ bool CHL2MP_Player::HandleCommand_JoinClass( int index )
   ShowClassSelectMenu();
   return false;
  }
- if ( m_iDesiredPlayerClass == index ) return true;
+ if ( m_iDesiredPlayerClass == index && m_iPlayerClass != DODS_CLASS_NONE ) return true;
  m_iDesiredPlayerClass = index;
  ShowViewPortPanel( DODSClassPanel( GetTeamNumber() ), false );
  // Only initial selection spawns immediately; death keeps the regular respawn timing.
@@ -73,6 +73,24 @@ bool CHL2MP_Player::PrepareDODSClass()
   for ( int i = 0; i < DODS_CLASS_COUNT; ++i )
    if ( CanChooseDODSClass( i ) ) choices[count++] = i;
   chosen = count ? choices[random->RandomInt( 0, count - 1 )] : DODS_CLASS_NONE;
+  if ( IsFakeClient() )
+  {
+   int least = gpGlobals->maxClients + 1, ties = 0;
+   for ( int c = 0; c < count; ++c )
+   {
+    int members = 0;
+    for ( int slot = 1; slot <= gpGlobals->maxClients; ++slot )
+    {
+     CHL2MP_Player *other = ToHL2MPPlayer( UTIL_PlayerByIndex( slot ) );
+     if ( !other || other == this || other->GetTeamNumber() != GetTeamNumber() ) continue;
+     int reserved = other->GetDesiredPlayerClass();
+     if ( reserved == DODS_CLASS_RANDOM ) reserved = other->GetPlayerClass();
+     if ( reserved == choices[c] ) ++members;
+    }
+    if ( members < least ) { least = members; ties = 0; }
+    if ( members == least && random->RandomInt( 0, ties++ ) == 0 ) chosen = choices[c];
+   }
+  }
  }
  else if ( !CanChooseDODSClass( chosen ) ) chosen = DODS_CLASS_NONE;
  m_iPlayerClass = chosen;

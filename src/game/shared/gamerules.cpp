@@ -215,7 +215,16 @@ bool CGameRules::IsSpawnPointValid( CBaseEntity *pSpot, CBasePlayer *pPlayer  )
 	{
 		// if ent is a client, don't spawn on 'em
 		if ( ent->IsPlayer() && ent != pPlayer )
+		{
+#if defined( DODS_REMAKE ) && defined( HL2MP )
+			CBasePlayer *occupant = ToBasePlayer( ent );
+			if ( !occupant->IsAlive() || occupant->IsObserver() ||
+				( pPlayer->GetTeamNumber() > TEAM_SPECTATOR &&
+				  occupant->GetTeamNumber() == pPlayer->GetTeamNumber() ) )
+				continue;
+#endif
 			return false;
+		}
 	}
 
 	return true;

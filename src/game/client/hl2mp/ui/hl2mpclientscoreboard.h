@@ -24,6 +24,9 @@ private:
 public:
 	CHL2MPClientScoreBoardDialog(IViewPort *pViewPort);
 	~CHL2MPClientScoreBoardDialog();
+#ifdef DODS_REMAKE
+	void Update() OVERRIDE;
+#endif
 
 
 protected:

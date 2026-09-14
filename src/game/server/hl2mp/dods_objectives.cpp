@@ -97,6 +97,8 @@ public:
   m_AlliesAllowed = alliesAllowed;
   m_AxisAllowed = axisAllowed;
  }
+ int PointIndex() const { return m_Index; }
+ int DefaultOwner() const { return m_DefaultOwner; }
 private:
  int m_DefaultOwner;
  string_t m_Group;
@@ -195,13 +197,28 @@ public:
  }
  void InputDisable( inputdata_t &data ) OVERRIDE { BaseClass::InputDisable( data ); BreakCapture(); if ( m_Point ) m_Point->ClearCapture(); }
  void InputReset( inputdata_t &data ) { BreakCapture(); m_LastThink = gpGlobals->curtime; }
+ CDODSControlPoint *BotPoint() const { return m_Point.Get(); }
+ bool CanBotCapture( CBasePlayer *player )
+ {
+  return player && !m_bDisabled && m_Point && m_Point->IsActive() &&
+   m_Point->GetTeamNumber() != player->GetTeamNumber() && PassesTriggerFilters( player ) &&
+   ( player->GetTeamNumber() == TEAM_AMERICANS ? m_AlliesAllowed :
+     player->GetTeamNumber() == TEAM_GERMANS && m_AxisAllowed );
+ }
+ bool ContainsBot( CBasePlayer *player )
+ {
+  Ray_t hull; trace_t overlap;
+  hull.Init( player->GetAbsOrigin(), player->GetAbsOrigin(), player->WorldAlignMins(), player->WorldAlignMaxs() );
+  enginetrace->ClipRayToCollideable( hull, MASK_ALL, CollisionProp(), &overlap );
+  return overlap.startsolid || overlap.allsolid;
+ }
  void CaptureThink()
  {
   float delta = MAX( 0.0f, gpGlobals->curtime - m_LastThink );
   m_LastThink = gpGlobals->curtime;
   SetNextThink( gpGlobals->curtime + 0.1f );
   if ( m_Point ) m_Point->ClearCapture();
-  if ( m_bDisabled || !m_Point || !m_Point->IsActive() || HL2MPRules()->IsIntermission() ) { BreakCapture(); return; }
+  if ( m_bDisabled || !m_Point || !m_Point->IsActive() || ( HL2MPRules()->IsIntermission() || HL2MPRules()->IsDODSRoundOver() ) ) { BreakCapture(); return; }
   int allies = 0, axis = 0;
   CBaseEntity *activator = this;
   for ( int i = 1; i <= gpGlobals->maxClients; ++i )
@@ -285,6 +302,33 @@ BEGIN_DATADESC( CDODSCaptureArea )
 END_DATADESC()
 
 // Minimal map-I/O win detector. HL2MP retains responsibility for round lifecycle.
+bool DODSBotCaptureGoal( CBasePlayer *player, CBaseEntity *candidate, Vector &goal, bool &inside )
+{
+ CDODSCaptureArea *area = dynamic_cast<CDODSCaptureArea *>( candidate );
+ if ( !area || !area->CanBotCapture( player ) ) return false;
+ goal = area->WorldSpaceCenter();
+ inside = area->ContainsBot( player );
+ return true;
+}
+
+int DODSBotCaptureOrder( CBasePlayer *player, CBaseEntity *candidate )
+{
+ CDODSCaptureArea *area = dynamic_cast<CDODSCaptureArea *>( candidate );
+ if ( !area || !area->BotPoint() ) return 0;
+ float sums[2] = { 0, 0 }; int counts[2] = { 0, 0 };
+ for ( CBaseEntity *ent = gEntList.FirstEnt(); ent; ent = gEntList.NextEnt( ent ) )
+ {
+  CDODSControlPoint *point = dynamic_cast<CDODSControlPoint *>( ent );
+  if ( !point || !point->IsActive() || !PlayingTeam( point->DefaultOwner() ) ) continue;
+  int side = point->DefaultOwner() == TEAM_AMERICANS ? 0 : 1;
+  sums[side] += point->PointIndex(); ++counts[side];
+ }
+ bool americansAscending = true;
+ if ( counts[0] && counts[1] ) americansAscending = sums[0] / counts[0] <= sums[1] / counts[1];
+ bool ascending = player->GetTeamNumber() == TEAM_AMERICANS ? americansAscending : !americansAscending;
+ return ascending ? area->BotPoint()->PointIndex() : -area->BotPoint()->PointIndex();
+}
+
 class CDODSPointMaster : public CPointEntity
 {
  DECLARE_CLASS( CDODSPointMaster, CPointEntity );
@@ -321,6 +365,7 @@ public:
   }
   if ( !count ) return;
   m_Winner = owner;
+  HL2MPRules()->EndDODSRound( owner );
   if ( owner == TEAM_AMERICANS ) m_AlliesWin.FireOutput( this, this );
   else m_AxisWin.FireOutput( this, this );
  }

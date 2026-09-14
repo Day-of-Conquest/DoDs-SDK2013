@@ -10,6 +10,11 @@
 #include "bot/behavior/hl2mp_bot_get_prop.h"
 #include "nav_mesh.h"
 
+#ifdef DODS_REMAKE
+ConVar dods_bot_debug_objectives( "dods_bot_debug_objectives", "0", FCVAR_GAMEDLL, "Log bot objective selections and navigation failures." );
+extern int DODSBotCaptureOrder( CBasePlayer *player, CBaseEntity *candidate );
+extern bool DODSBotCaptureGoal( CBasePlayer *player, CBaseEntity *candidate, Vector &goal, bool &inside );
+#endif
 extern ConVar hl2mp_bot_path_lookahead_range;
 extern ConVar hl2mp_bot_offense_must_push_time;
 extern ConVar hl2mp_bot_defense_must_defend_time;
@@ -53,6 +58,67 @@ ActionResult< CHL2MPBot >	CHL2MPBotSeekAndDestroy::OnStart( CHL2MPBot *me, Actio
 //---------------------------------------------------------------------------------------------
 ActionResult< CHL2MPBot >	CHL2MPBotSeekAndDestroy::Update( CHL2MPBot *me, float interval )
 {
+#ifdef DODS_REMAKE
+	if ( HL2MPRules()->IsDODSRoundOver() ) { m_path.Invalidate(); return Continue(); }
+	if ( m_dodsRetry.IsElapsed() )
+	{
+		m_dodsFailedGoals.RemoveAll();
+		m_dodsRetry.Start( 10.0f );
+	}
+	Vector captureGoal;
+	bool inside = false;
+	bool validGoal = m_dodsGoal && DODSBotCaptureGoal( me, m_dodsGoal, captureGoal, inside );
+	if ( !validGoal || ( !inside && m_dodsSelect.IsElapsed() ) )
+	{
+		EHANDLE previousGoal = m_dodsGoal;
+		m_dodsSelect.Start( 1.0f );
+		m_dodsGoal = NULL;
+		float best = FLT_MAX;
+		int bestOrder = INT_MAX;
+		for ( CBaseEntity *ent = gEntList.FindEntityByClassname( NULL, "dod_capture_area" ); ent;
+			ent = gEntList.FindEntityByClassname( ent, "dod_capture_area" ) )
+		{
+			if ( m_dodsFailedGoals.Find( EHANDLE( ent ) ) != m_dodsFailedGoals.InvalidIndex() ) continue;
+			Vector goal; bool touching;
+			if ( !DODSBotCaptureGoal( me, ent, goal, touching ) ) continue;
+			float distance = touching ? 0 : ( goal - me->GetAbsOrigin() ).LengthSqr();
+			int order = DODSBotCaptureOrder( me, ent );
+			if ( order < bestOrder || ( order == bestOrder && distance < best ) )
+			{
+				bestOrder = order; best = distance;
+				m_dodsGoal = ent; captureGoal = goal; inside = touching;
+			}
+		}
+		if ( previousGoal != m_dodsGoal )
+		{
+			m_path.Invalidate();
+			m_dodsRepath.Invalidate();
+			if ( dods_bot_debug_objectives.GetBool() ) Msg( "DODS bot %d team %d: target %s\n", me->entindex(), me->GetTeamNumber(), m_dodsGoal ? m_dodsGoal->GetDebugName() : "none reachable (check nav mesh)" );
+		}
+	}
+	if ( m_dodsGoal )
+	{
+		if ( inside ) { m_path.Invalidate(); return Continue(); }
+		if ( !m_path.IsValid() || m_dodsRepath.IsElapsed() )
+		{
+			m_dodsRepath.Start( 1.0f );
+			CNavArea *area = TheNavMesh->GetNearestNavArea( captureGoal );
+			Vector destination = captureGoal;
+			if ( area ) area->GetClosestPointOnArea( captureGoal, &destination );
+			if ( me->IsRangeLessThan( destination, 24.0f ) ) destination = captureGoal;
+			CHL2MPBotPathCost cost( me, FASTEST_ROUTE );
+			if ( !m_path.Compute( me, destination, cost ) || m_path.GetResult() != Path::COMPLETE_PATH )
+			{
+				if ( m_dodsFailedGoals.Find( m_dodsGoal ) == m_dodsFailedGoals.InvalidIndex() ) m_dodsFailedGoals.AddToTail( m_dodsGoal );
+				if ( dods_bot_debug_objectives.GetBool() ) Msg( "DODS bot %d team %d: cannot reach %s from %.0f %.0f %.0f; trying other objectives.\n", me->entindex(), me->GetTeamNumber(), m_dodsGoal->GetDebugName(), me->GetAbsOrigin().x, me->GetAbsOrigin().y, me->GetAbsOrigin().z );
+				m_dodsGoal = NULL; m_path.Invalidate();
+				return Continue();
+			}
+		}
+		m_path.Update( me );
+		return Continue();
+	}
+#endif
 	if ( m_giveUpTimer.HasStarted() && m_giveUpTimer.IsElapsed() )
 	{
 		return Done( "Behavior duration elapsed" );
@@ -156,6 +222,16 @@ ActionResult< CHL2MPBot > CHL2MPBotSeekAndDestroy::OnResume( CHL2MPBot *me, Acti
 //---------------------------------------------------------------------------------------------
 EventDesiredResult< CHL2MPBot > CHL2MPBotSeekAndDestroy::OnStuck( CHL2MPBot *me )
 {
+#ifdef DODS_REMAKE
+	if ( m_dodsGoal )
+	{
+		if ( m_dodsFailedGoals.Find( m_dodsGoal ) == m_dodsFailedGoals.InvalidIndex() ) m_dodsFailedGoals.AddToTail( m_dodsGoal );
+				if ( dods_bot_debug_objectives.GetBool() ) Msg( "DODS bot %d team %d: cannot reach %s from %.0f %.0f %.0f; trying other objectives.\n", me->entindex(), me->GetTeamNumber(), m_dodsGoal->GetDebugName(), me->GetAbsOrigin().x, me->GetAbsOrigin().y, me->GetAbsOrigin().z );
+		m_dodsGoal = NULL; m_path.Invalidate();
+		me->GetLocomotionInterface()->ClearStuckStatus();
+		return TryContinue();
+	}
+#endif
 	RecomputeSeekPath( me );
 
 	return TryContinue();
@@ -183,6 +259,9 @@ EventDesiredResult< CHL2MPBot > CHL2MPBotSeekAndDestroy::OnMoveToFailure( CHL2MP
 //---------------------------------------------------------------------------------------------
 QueryResultType	CHL2MPBotSeekAndDestroy::ShouldRetreat( const INextBot *meBot ) const
 {
+#ifdef DODS_REMAKE
+	if ( m_dodsGoal ) return ANSWER_NO;
+#endif
 	return ANSWER_UNDEFINED;
 }
 
@@ -190,6 +269,9 @@ QueryResultType	CHL2MPBotSeekAndDestroy::ShouldRetreat( const INextBot *meBot ) 
 //---------------------------------------------------------------------------------------------
 QueryResultType CHL2MPBotSeekAndDestroy::ShouldHurry( const INextBot *me ) const
 {
+#ifdef DODS_REMAKE
+	if ( m_dodsGoal ) return ANSWER_YES;
+#endif
 	return ANSWER_UNDEFINED;
 }
 
@@ -287,6 +369,9 @@ private:
 //---------------------------------------------------------------------------------------------
 void CHL2MPBotSeekAndDestroy::RecomputeSeekPath( CHL2MPBot *me )
 {
+#ifdef DODS_REMAKE
+	if ( m_dodsGoal ) { m_path.Invalidate(); return; }
+#endif
 	if ( m_bOverrideApproach )
 	{
 		return;

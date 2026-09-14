@@ -12,6 +12,9 @@
 #include "c_playerresource.h"
 #include "c_hl2mp_player.h"
 #include "hl2mp_gamerules.h"
+#ifdef DODS_REMAKE
+#include "dods/dods_classes.h"
+#endif
 
 #include <KeyValues.h>
 
@@ -322,6 +325,10 @@ void CHL2MPClientScoreBoardDialog::ApplySchemeSettings( vgui::IScheme *pScheme )
 	SetBorder( pScheme->GetBorder( "BaseBorder" ) );
 
 	m_pPlayerList->SetProportional( true );
+#ifdef DODS_REMAKE
+	m_pPlayerList->SetVisible( false );
+	Update();
+#endif
 }
 
 
@@ -659,3 +666,72 @@ void CHL2MPClientScoreBoardDialog::UpdatePlayerInfo()
 
 	
 }
+
+#ifdef DODS_REMAKE
+void CHL2MPClientScoreBoardDialog::Update()
+{
+ m_pPlayerList->SetVisible( false );
+ SetControlString( "Allies_ObjectivesHeader", "Wins" );
+ SetControlString( "Axis_ObjectivesHeader", "Wins" );
+ if ( !g_PR ) return;
+ const char *listNames[] = { "PlayerListAllies", "PlayerListAxis" };
+ const char *prefixes[] = { "allies", "axis" };
+ for ( int side = 0; side < 2; ++side )
+ {
+  SectionedListPanel *list = dynamic_cast<SectionedListPanel *>( FindChildByName( listNames[side] ) );
+  if ( !list ) continue;
+  const int team = side == 0 ? TEAM_AMERICANS : TEAM_GERMANS;
+  list->SetVisible( true );
+  list->SetVerticalScrollbar( true );
+  list->DeleteAllItems(); list->RemoveAllSections();
+  list->AddSection( 0, "", StaticPlayerSortFunc );
+  list->SetSectionAlwaysVisible( 0 );
+  const int unit = scheme()->GetProportionalScaledValueEx( GetScheme(), 1 );
+  const int stats = scheme()->GetProportionalScaledValueEx( GetScheme(), 28 );
+  const int cls = scheme()->GetProportionalScaledValueEx( GetScheme(), 68 );
+  list->AddColumnToSection( 0, "name", "Player", 0, MAX( 30 * unit, list->GetWide() - cls - 3 * stats - 16 * unit ) );
+  list->AddColumnToSection( 0, "class", "Class", 0, cls );
+  list->AddColumnToSection( 0, "frags", "Kills", SectionedListPanel::COLUMN_RIGHT, stats );
+  list->AddColumnToSection( 0, "deaths", "Deaths", SectionedListPanel::COLUMN_RIGHT, stats );
+  list->AddColumnToSection( 0, "ping", "Ping", SectionedListPanel::COLUMN_RIGHT, stats );
+  int count = 0, kills = 0, deaths = 0, ping = 0;
+  for ( int i = 1; i <= gpGlobals->maxClients; ++i )
+  {
+   if ( !g_PR->IsConnected( i ) || g_PR->GetTeam( i ) != team ) continue;
+   KeyValues *row = new KeyValues( "player" );
+   row->SetInt( "playerIndex", i );
+   row->SetString( "name", g_PR->GetPlayerName( i ) );
+   row->SetInt( "frags", g_PR->GetPlayerScore( i ) );
+   row->SetInt( "deaths", g_PR->GetDeaths( i ) );
+   if ( g_PR->IsFakePlayer( i ) ) row->SetString( "ping", "BOT" );
+   else row->SetInt( "ping", g_PR->GetPing( i ) );
+   const DODSClassInfo *info = DODSGetClass( team, g_PR->GetDODSReservedClass( i ) );
+   const wchar_t *title = info ? g_pVGuiLocalize->Find( info->title ) : NULL;
+   if ( title ) row->SetWString( "class", title );
+   else row->SetString( "class", info ? info->title : "Selecting" );
+   int item = list->AddItem( 0, row );
+   list->SetItemFgColor( item, g_PR->IsAlive( i ) ? Color( 240, 240, 240, 255 ) : Color( 145, 145, 145, 255 ) );
+   row->deleteThis();
+   ++count; kills += g_PR->GetPlayerScore( i ); deaths += g_PR->GetDeaths( i ); ping += g_PR->GetPing( i );
+  }
+  char key[64], text[128];
+  Q_snprintf( text, sizeof( text ), "%s (%d players)", side == 0 ? "Americans" : "Germans", count );
+  Q_snprintf( key, sizeof( key ), "%s_teamplayercount", prefixes[side] ); SetDialogVariable( key, text );
+  C_Team *teamInfo = GetGlobalTeam( team );
+  Q_snprintf( key, sizeof( key ), "%s_teamscore", prefixes[side] ); SetDialogVariable( key, teamInfo ? teamInfo->Get_Score() : 0 );
+  Q_snprintf( key, sizeof( key ), "%s_teamfrags", prefixes[side] ); SetDialogVariable( key, kills );
+  Q_snprintf( key, sizeof( key ), "%s_teamdeaths", prefixes[side] ); SetDialogVariable( key, deaths );
+  Q_snprintf( key, sizeof( key ), "%s_teamping", prefixes[side] ); SetDialogVariable( key, count ? ping / count : 0 );
+ }
+ char spectators[1024] = "Spectators: ";
+ for ( int i = 1; i <= gpGlobals->maxClients; ++i )
+ {
+  if ( !g_PR->IsConnected( i ) || g_PR->GetTeam( i ) >= TEAM_AMERICANS ) continue;
+  if ( Q_strlen( spectators ) > 12 ) Q_strncat( spectators, ", ", sizeof( spectators ) );
+  Q_strncat( spectators, g_PR->GetPlayerName( i ), sizeof( spectators ) );
+ }
+ SetDialogVariable( "spectators", spectators );
+ MoveToCenterOfScreen();
+ m_fNextUpdateTime = gpGlobals->curtime + 1.0f;
+}
+#endif

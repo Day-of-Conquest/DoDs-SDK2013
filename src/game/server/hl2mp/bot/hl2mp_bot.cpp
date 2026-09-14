@@ -56,6 +56,10 @@ bool IsTeamName( const char *string )
 //-----------------------------------------------------------------------------------------------------
 int Bot_GetTeamByName( const char *string )
 {
+#ifdef DODS_REMAKE
+	if ( !Q_stricmp( string, "americans" ) || !Q_stricmp( string, "allies" ) ) return TEAM_AMERICANS;
+	if ( !Q_stricmp( string, "germans" ) || !Q_stricmp( string, "axis" ) ) return TEAM_GERMANS;
+#endif
 	int iTeam = TEAM_UNASSIGNED;
 	if ( !stricmp( string, "rebels" ) )
 	{
@@ -255,8 +259,12 @@ CON_COMMAND_F( hl2mp_bot_add, "Add a bot.", FCVAR_GAMEDLL )
 			}
 			engine->SetFakeClientConVarValue( pBot->edict(), "cl_playermodel", pszModel );
 			engine->SetFakeClientConVarValue( pBot->edict(), "name", name );
+#ifdef DODS_REMAKE
+			pBot->HandleCommand_JoinTeam( Bot_GetTeamByName( teamname ) );
+#else
 			pBot->HandleCommand_JoinTeam( iTeam );
 			pBot->ChangeTeam( iTeam );
+#endif
 
 			pBot->SetDifficulty( skill );
 

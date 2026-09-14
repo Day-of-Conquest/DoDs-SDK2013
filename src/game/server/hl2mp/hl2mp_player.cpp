@@ -396,6 +396,19 @@ void CHL2MP_Player::PickDefaultSpawnTeam( void )
 //-----------------------------------------------------------------------------
 // Purpose: Sets HL2 specific defaults.
 //-----------------------------------------------------------------------------
+#ifdef DODS_REMAKE
+unsigned int CHL2MP_Player::PlayerSolidMask( bool brushOnly ) const
+{
+ unsigned int mask = BaseClass::PlayerSolidMask( brushOnly );
+ if ( !IsObserver() )
+ {
+  if ( GetTeamNumber() == TEAM_AMERICANS ) mask |= CONTENTS_TEAM1;
+  if ( GetTeamNumber() == TEAM_GERMANS ) mask |= CONTENTS_TEAM2;
+ }
+ return mask;
+}
+#endif
+
 void CHL2MP_Player::Spawn(void)
 {
 #ifdef DODS_REMAKE
@@ -423,6 +436,11 @@ void CHL2MP_Player::Spawn(void)
 		RemoveEffects( EF_NODRAW );
 		
 		GiveDefaultItems();
+#ifdef DODS_REMAKE
+		SetSolid( SOLID_BBOX );
+		SetCollisionGroup( COLLISION_GROUP_PLAYER );
+		RemoveSolidFlags( FSOLID_NOT_SOLID );
+#endif
 	}
 
 	SetNumAnimOverlays( 3 );
@@ -435,7 +453,11 @@ void CHL2MP_Player::Spawn(void)
 
 	m_impactEnergyScale = HL2MPPLAYER_PHYSDAMAGE_SCALE;
 
-	if ( HL2MPRules()->IsIntermission() )
+	if ( HL2MPRules()->IsIntermission()
+#ifdef DODS_REMAKE
+		|| HL2MPRules()->IsDODSRoundOver()
+#endif
+	)
 	{
 		AddFlag( FL_FROZEN );
 	}
@@ -941,7 +963,8 @@ bool CHL2MP_Player::HandleCommand_JoinTeam( int team )
 #ifdef DODS_REMAKE
  if ( team == GetTeamNumber() && ( team == TEAM_AMERICANS || team == TEAM_GERMANS ) )
  {
-  ShowClassSelectMenu();
+  if ( IsFakeClient() && m_iPlayerClass == DODS_CLASS_NONE ) return HandleCommand_JoinClass( DODS_CLASS_RANDOM );
+  if ( !IsFakeClient() ) ShowClassSelectMenu();
   return true;
  }
 #endif
@@ -983,7 +1006,8 @@ bool CHL2MP_Player::HandleCommand_JoinTeam( int team )
   RemoveAllItems( true );
   State_Transition( STATE_OBSERVER_MODE );
  }
- ShowClassSelectMenu();
+ if ( IsFakeClient() ) HandleCommand_JoinClass( DODS_CLASS_RANDOM );
+ else ShowClassSelectMenu();
 #endif
 
 	return true;
@@ -1283,7 +1307,9 @@ void CHL2MP_Player::Event_Killed( const CTakeDamageInfo &info )
 			iScoreToAdd = -1;
 		}
 
+#ifndef DODS_REMAKE
 		GetGlobalTeam( pAttacker->GetTeamNumber() )->AddScore( iScoreToAdd );
+#endif
 	}
 
 	FlashlightTurnOff();
@@ -1296,6 +1322,9 @@ void CHL2MP_Player::Event_Killed( const CTakeDamageInfo &info )
 
 int CHL2MP_Player::OnTakeDamage( const CTakeDamageInfo &inputInfo )
 {
+#ifdef DODS_REMAKE
+	if ( HL2MPRules()->IsDODSRoundOver() ) return 0;
+#endif
 	//return here if the player is in the respawn grace period vs. slams.
 	if ( gpGlobals->curtime < m_flSlamProtectTime &&  (inputInfo.GetDamageType() == DMG_BLAST ) )
 		return 0;
@@ -1434,6 +1463,10 @@ CBaseEntity* CHL2MP_Player::EntSelectSpawnPoint( void )
 		CBaseEntity *ent = NULL;
 		for ( CEntitySphereQuery sphere( pSpot->GetAbsOrigin(), hl2mp_spawn_frag_fallback_radius.GetFloat() ); (ent = sphere.GetCurrentEntity()) != NULL; sphere.NextEntity() )
 		{
+#ifdef DODS_REMAKE
+			if ( ent->IsPlayer() && ( !ent->IsAlive() || ent->GetTeamNumber() == GetTeamNumber() ) )
+				continue;
+#endif
 			// if ent is a client, kill em (unless they are ourselves)
 			if ( ent->IsPlayer() && !(ent->edict() == player) )
 				ent->TakeDamage( CTakeDamageInfo( GetContainingEntity(INDEXENT(0)), GetContainingEntity(INDEXENT(0)), 300, DMG_GENERIC ) );

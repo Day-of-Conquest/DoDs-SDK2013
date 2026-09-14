@@ -302,6 +302,16 @@ bool CTraceFilterSimple::ShouldHitEntity( IHandleEntity *pHandleEntity, int cont
 	CBaseEntity *pEntity = EntityFromEntityHandle( pHandleEntity );
 	if ( !pEntity )
 		return false;
+#if defined( DODS_REMAKE ) && defined( HL2MP )
+	if ( m_collisionGroup == COLLISION_GROUP_PLAYER_MOVEMENT && m_pPassEnt && pEntity->IsPlayer() )
+	{
+		const CBaseEntity *movingPlayer = EntityFromEntityHandle( m_pPassEnt );
+		if ( movingPlayer && movingPlayer->IsPlayer() &&
+			movingPlayer->GetTeamNumber() > TEAM_SPECTATOR &&
+			movingPlayer->GetTeamNumber() == pEntity->GetTeamNumber() )
+			return false;
+	}
+#endif
 	if ( !pEntity->ShouldCollide( m_collisionGroup, contentsMask ) )
 		return false;
 	if ( pEntity && !g_pGameRules->ShouldCollide( m_collisionGroup, pEntity->GetCollisionGroup() ) )

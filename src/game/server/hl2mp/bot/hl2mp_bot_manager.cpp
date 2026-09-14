@@ -335,8 +335,12 @@ void CHL2MPBotManager::MaintainBotQuota()
 			CreateBotName( pBot->GetTeamNumber(), skill, name, sizeof( name ) );
 			engine->SetFakeClientConVarValue( pBot->edict(), "cl_playermodel", pszModel );
 			engine->SetFakeClientConVarValue( pBot->edict(), "name", name );
+#ifdef DODS_REMAKE
+			pBot->HandleCommand_JoinTeam( TEAM_UNASSIGNED );
+#else
 			pBot->HandleCommand_JoinTeam( iTeam );
 			pBot->ChangeTeam( iTeam );
+#endif
 		}
 	}
 	else if ( desiredBotCount < nHL2MPBotsOnGameTeams )

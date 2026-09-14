@@ -157,6 +157,12 @@ public:
 	void CleanUpMap();
 	void CheckRestartGame();
 	void RestartGame();
+#if defined( DODS_REMAKE ) && !defined( CLIENT_DLL )
+	void EndDODSRound( int team );
+	bool IsDODSRoundOver() const { return m_iDODSRoundWinner != 0; }
+	int m_iDODSRoundWinner;
+	float m_flDODSRoundRestart;
+#endif
 
 	void OnNavMeshLoad( void );
 	

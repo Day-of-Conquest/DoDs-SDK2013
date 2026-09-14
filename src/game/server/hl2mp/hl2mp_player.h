@@ -63,6 +63,9 @@ public:
 
 	virtual void Precache( void );
 	virtual void Spawn( void );
+#ifdef DODS_REMAKE
+	unsigned int PlayerSolidMask( bool brushOnly = false ) const OVERRIDE;
+#endif
 	virtual void PostThink( void );
 	virtual void PreThink( void );
 	virtual void PlayerDeathThink( void );
