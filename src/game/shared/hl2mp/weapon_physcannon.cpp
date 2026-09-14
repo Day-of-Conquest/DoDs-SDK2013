@@ -441,11 +441,7 @@ void CGrabController::AttachEntity( CBasePlayer *pPlayer, CBaseEntity *pEntity, 
 	{
 		// misyl: Disable pred filtering in this server-only section.
 		CDisablePredictionFiltering disablePred;
-#ifndef DODS_REMAKE
-		// Disabling this for now since its causing some bum fuck weird ass crash i could fix but i cant be bothered to. - Vvis :3
 		PhysicsImpactSound( pPlayer, pPhys, CHAN_STATIC, pPhys->GetMaterialIndex(), pPlayer->VPhysicsGetObject()->GetMaterialIndex(), 1.0, 64 );
-#endif // !DODS_REMAKE
-
 	}
 #endif
 	Vector position;
@@ -904,7 +900,6 @@ END_PREDICTION_DATA()
 LINK_ENTITY_TO_CLASS( weapon_physcannon, CWeaponPhysCannon );
 PRECACHE_WEAPON_REGISTER( weapon_physcannon );
 
-#ifndef CLIENT_DLL
 
 acttable_t	CWeaponPhysCannon::m_acttable[] = 
 {
@@ -919,7 +914,6 @@ acttable_t	CWeaponPhysCannon::m_acttable[] =
 
 IMPLEMENT_ACTTABLE(CWeaponPhysCannon);
 
-#endif
 
 
 enum

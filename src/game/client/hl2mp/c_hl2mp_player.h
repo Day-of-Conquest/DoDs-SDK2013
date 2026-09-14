@@ -11,6 +11,7 @@
 
 class C_HL2MP_Player;
 #include "c_basehlplayer.h"
+#include "hl2mp_playeranimstate.h"
 #include "hl2mp_player_shared.h"
 #include "beamdraw.h"
 
@@ -79,6 +80,7 @@ public:
 	virtual void OnDataChanged( DataUpdateType_t type );
 	virtual float GetFOV( void );
 	virtual CStudioHdr *OnNewModel( void );
+	virtual bool Weapon_Switch( CBaseCombatWeapon *pWeapon, int viewmodelindex = 0 );
 	virtual void TraceAttack( const CTakeDamageInfo &info, const Vector &vecDir, trace_t *ptr, CDmgAccumulator *pAccumulator );
 	virtual void ItemPreFrame( void );
 	virtual void ItemPostFrame( void );
@@ -126,18 +128,21 @@ public:
 	bool IsWalking( void ) { return m_fIsWalking; }
 
 	virtual void PostThink( void );
+	virtual void UpdateClientSideAnimation( void );
+
+	void DoAnimationEvent( PlayerAnimEvent_t event, int nData = 0 );
 
 private:
 	
 	C_HL2MP_Player( const C_HL2MP_Player & );
 
-	CPlayerAnimState m_PlayerAnimState;
 
 #ifdef DODS_REMAKE
 	CNetworkVar( bool, m_bCrawling);
 	CNetworkVar( int, m_iPlayerClass );
 	CNetworkVar( int, m_iDesiredPlayerClass );
 #endif
+	CHL2MPPlayerAnimState *m_PlayerAnimState;
 
 	QAngle	m_angEyeAngles;
 

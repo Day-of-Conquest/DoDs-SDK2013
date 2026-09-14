@@ -55,9 +55,7 @@ public:
 		return DOD_WEAPON_TYPE_PISTOL;
 	}
 
-#ifndef CLIENT_DLL
 	DECLARE_ACTTABLE();
-#endif
 
 private:
 
@@ -76,8 +74,6 @@ END_PREDICTION_DATA()
 LINK_ENTITY_TO_CLASS(weapon_revolver, CWeaponRevolver);
 PRECACHE_WEAPON_REGISTER(weapon_revolver);
 
-
-#ifndef CLIENT_DLL
 
 acttable_t CWeaponRevolver::m_acttable[] =
 {
@@ -110,7 +106,6 @@ acttable_t CWeaponRevolver::m_acttable[] =
 
 IMPLEMENT_ACTTABLE(CWeaponRevolver);
 
-#endif
 
 
 //-----------------------------------------------------------------------------
@@ -263,9 +258,8 @@ public:
 		return 0.5f;
 	}
 
-#ifndef CLIENT_DLL
+
 	DECLARE_ACTTABLE();
-#endif
 
 private:
 
@@ -321,8 +315,6 @@ LINK_ENTITY_TO_CLASS(weapon_p38, CWeaponP38);
 PRECACHE_WEAPON_REGISTER(weapon_p38);
 
 
-#ifndef CLIENT_DLL
-
 acttable_t CWeaponP38::m_acttable[] =
 {
 	{ ACT_DOD_STAND_AIM,					ACT_DOD_STAND_AIM_PISTOL,				false },
@@ -354,7 +346,6 @@ acttable_t CWeaponP38::m_acttable[] =
 
 IMPLEMENT_ACTTABLE(CWeaponP38);
 
-#endif
 
 Activity CWeaponP38::GetIdleActivity(void)
 {
@@ -651,9 +642,7 @@ public:
 		return 0.5f;
 	}
 
-#ifndef CLIENT_DLL
 	DECLARE_ACTTABLE();
-#endif
 
 private:
 
@@ -709,8 +698,6 @@ LINK_ENTITY_TO_CLASS(weapon_colt, CWeaponColt);
 PRECACHE_WEAPON_REGISTER(weapon_colt);
 
 
-#ifndef CLIENT_DLL
-
 acttable_t CWeaponColt::m_acttable[] =
 {
 	{ ACT_DOD_STAND_AIM,					ACT_DOD_STAND_AIM_PISTOL,				false },
@@ -741,8 +728,6 @@ acttable_t CWeaponColt::m_acttable[] =
 };
 
 IMPLEMENT_ACTTABLE(CWeaponColt);
-
-#endif
 
 Activity CWeaponColt::GetIdleActivity(void)
 {

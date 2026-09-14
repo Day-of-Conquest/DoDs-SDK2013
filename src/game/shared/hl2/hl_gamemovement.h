@@ -84,16 +84,6 @@ private:
 	CFuncLadder *GetLadder();
 };
 
-#if defined( DODS_REMAKE ) && defined( HL2MP )
-class CDODSGameMovement : public CHL2GameMovement
-{
-public:
-	typedef CHL2GameMovement BaseClass;
-	virtual void Duck( void ) OVERRIDE;
-	virtual bool CheckJumpButton( void ) OVERRIDE;
-	virtual bool LadderMove( void ) OVERRIDE;
-};
-#endif
 
 
 //-----------------------------------------------------------------------------

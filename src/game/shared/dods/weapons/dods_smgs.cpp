@@ -51,9 +51,7 @@ public:
 	DECLARE_NETWORKCLASS();
 	DECLARE_PREDICTABLE();
 
-#ifndef CLIENT_DLL
 	DECLARE_ACTTABLE();
-#endif
 
 private:
 
@@ -73,8 +71,6 @@ END_PREDICTION_DATA()
 LINK_ENTITY_TO_CLASS(weapon_thompson, CWeaponThompson);
 PRECACHE_WEAPON_REGISTER(weapon_thompson);
 
-
-#ifndef CLIENT_DLL
 
 acttable_t CWeaponThompson::m_acttable[] = 
 {
@@ -109,7 +105,6 @@ acttable_t CWeaponThompson::m_acttable[] =
 
 IMPLEMENT_ACTTABLE(CWeaponThompson);
 
-#endif
 
 
 //-----------------------------------------------------------------------------

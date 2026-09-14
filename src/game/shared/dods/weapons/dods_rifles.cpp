@@ -48,9 +48,7 @@ public:
 	DECLARE_NETWORKCLASS();
 	DECLARE_PREDICTABLE();
 
-#ifndef CLIENT_DLL
 	DECLARE_ACTTABLE();
-#endif
 
 private:
 
@@ -70,8 +68,6 @@ END_PREDICTION_DATA()
 LINK_ENTITY_TO_CLASS(weapon_garand, CWeaponGarand);
 PRECACHE_WEAPON_REGISTER(weapon_garand);
 
-
-#ifndef CLIENT_DLL
 
 acttable_t CWeaponGarand::m_acttable[] =
 {
@@ -109,8 +105,6 @@ acttable_t CWeaponGarand::m_acttable[] =
 };
 
 IMPLEMENT_ACTTABLE(CWeaponGarand);
-
-#endif
 
 
 //-----------------------------------------------------------------------------
