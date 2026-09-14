@@ -60,6 +60,9 @@ public : // IGameResources interface
 
 	uint32 GetAccountID( int iIndex );
 	bool IsValid( int iIndex );
+#if defined( DODS_REMAKE ) && defined( HL2MP )
+	int GetDODSReservedClass( int index ) { return index > 0 && index < MAX_PLAYERS_ARRAY_SAFE && IsConnected( index ) ? m_iDODSReservedClass[index] : -1; }
+#endif
 
 protected:
 	void	UpdatePlayerName( int slot );
@@ -72,6 +75,9 @@ protected:
 	int		m_iDeaths[MAX_PLAYERS_ARRAY_SAFE];
 	bool	m_bConnected[MAX_PLAYERS_ARRAY_SAFE];
 	int		m_iTeam[MAX_PLAYERS_ARRAY_SAFE];
+#if defined( DODS_REMAKE ) && defined( HL2MP )
+	int m_iDODSReservedClass[MAX_PLAYERS_ARRAY_SAFE];
+#endif
 	bool	m_bAlive[MAX_PLAYERS_ARRAY_SAFE];
 	int		m_iHealth[MAX_PLAYERS_ARRAY_SAFE];
 	Color	m_Colors[MAX_TEAMS];

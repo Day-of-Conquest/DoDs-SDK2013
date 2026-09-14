@@ -64,6 +64,8 @@ public:
 	Vector GetAttackSpread( CBaseCombatWeapon *pWeapon, CBaseEntity *pTarget = NULL );
 
 #ifdef DODS_REMAKE
+	int GetPlayerClass() const { return m_iPlayerClass; }
+	int GetDesiredPlayerClass() const { return m_iDesiredPlayerClass; }
 	bool				IsCrawling(void) const;
 	bool				SetCrawling(bool bCrawling, bool bNoAnimation);
 #endif
@@ -133,6 +135,8 @@ private:
 
 #ifdef DODS_REMAKE
 	CNetworkVar( bool, m_bCrawling);
+	CNetworkVar( int, m_iPlayerClass );
+	CNetworkVar( int, m_iDesiredPlayerClass );
 #endif
 
 	QAngle	m_angEyeAngles;

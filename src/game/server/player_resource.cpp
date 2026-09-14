@@ -5,6 +5,10 @@
 // $NoKeywords: $
 //=============================================================================//
 #include "cbase.h"
+#if defined( DODS_REMAKE ) && defined( HL2MP )
+#include "hl2mp_player.h"
+#include "dods/dods_classes.h"
+#endif
 #include "player.h"
 #include "player_resource.h"
 #include <coordsize.h>
@@ -21,6 +25,9 @@ IMPLEMENT_SERVERCLASS_ST_NOBASE(CPlayerResource, DT_PlayerResource)
 	SendPropArray3( SENDINFO_ARRAY3(m_iDeaths), SendPropInt( SENDINFO_ARRAY(m_iDeaths), 12 ) ),
 	SendPropArray3( SENDINFO_ARRAY3(m_bConnected), SendPropInt( SENDINFO_ARRAY(m_bConnected), 1, SPROP_UNSIGNED ) ),
 	SendPropArray3( SENDINFO_ARRAY3(m_iTeam), SendPropInt( SENDINFO_ARRAY(m_iTeam), 4 ) ),
+#if defined( DODS_REMAKE ) && defined( HL2MP )
+	SendPropArray3( SENDINFO_ARRAY3( m_iDODSReservedClass ), SendPropInt( SENDINFO_ARRAY( m_iDODSReservedClass ), 5 ) ),
+#endif
 	SendPropArray3( SENDINFO_ARRAY3(m_bAlive), SendPropInt( SENDINFO_ARRAY(m_bAlive), 1, SPROP_UNSIGNED ) ),
 	SendPropArray3( SENDINFO_ARRAY3(m_iHealth), SendPropInt( SENDINFO_ARRAY(m_iHealth), -1, SPROP_VARINT | SPROP_UNSIGNED ) ),
 	SendPropArray3( SENDINFO_ARRAY3(m_iAccountID), SendPropInt( SENDINFO_ARRAY(m_iAccountID), 32, SPROP_UNSIGNED ) ),
@@ -72,6 +79,9 @@ void CPlayerResource::Init( int iIndex )
 	m_iDeaths.Set( iIndex, 0 );
 	m_bConnected.Set( iIndex, 0 );
 	m_iTeam.Set( iIndex, 0 );
+#if defined( DODS_REMAKE ) && defined( HL2MP )
+	m_iDODSReservedClass.Set( iIndex, DODS_CLASS_NONE );
+#endif
 	m_bAlive.Set( iIndex, 0 );
 	m_iHealth.Set( iIndex, 0 );
 	m_iAccountID.Set( iIndex, 0 );
@@ -130,6 +140,11 @@ void CPlayerResource::UpdateConnectedPlayer( int iIndex, CBasePlayer *pPlayer )
 	m_iDeaths.Set( iIndex, pPlayer->DeathCount() );
 	m_bConnected.Set( iIndex, 1 );
 	m_iTeam.Set( iIndex, pPlayer->GetTeamNumber() );
+#if defined( DODS_REMAKE ) && defined( HL2MP )
+ CHL2MP_Player *dods = ToHL2MPPlayer( pPlayer );
+ int reserved = dods->GetDesiredPlayerClass();
+ m_iDODSReservedClass.Set( iIndex, reserved == DODS_CLASS_RANDOM ? dods->GetPlayerClass() : reserved );
+#endif
 	m_bAlive.Set( iIndex, pPlayer->IsAlive()?1:0 );
 	m_iHealth.Set( iIndex, MAX( 0, pPlayer->GetHealth() ) );
 	m_bValid.Set( iIndex, 1 );

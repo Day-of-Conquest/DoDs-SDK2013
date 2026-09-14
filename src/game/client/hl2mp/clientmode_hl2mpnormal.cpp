@@ -20,6 +20,9 @@
 #include "ienginevgui.h"
 #ifdef DODS_REMAKE
 #include "dods/ui/dods_teammenu.h"
+#include "dods/ui/dods_classmenu.h"
+#include "dods/dods_classes.h"
+#include "hl2mp_gamerules.h"
 #endif
 
 // memdbgon must be the last include file in a .cpp file!!!
@@ -68,6 +71,8 @@ protected:
 	{
 		BaseClass::CreateDefaultPanels();
 		AddNewPanel( CreatePanelByName( PANEL_TEAM ), "PANEL_TEAM" );
+		AddNewPanel( CreatePanelByName( PANEL_CLASS_ALLIES ), "PANEL_CLASS_ALLIES" );
+		AddNewPanel( CreatePanelByName( PANEL_CLASS_AXIS ), "PANEL_CLASS_AXIS" );
 	}
 #endif
 };
@@ -84,6 +89,8 @@ IViewPortPanel* CHudViewport::CreatePanelByName( const char *szPanelName )
 #ifdef DODS_REMAKE
 	if ( Q_strcmp( PANEL_TEAM, szPanelName ) == 0 )
 		return new CDODSTeamMenu( this );
+	if ( FStrEq( szPanelName, PANEL_CLASS_ALLIES ) ) return new CDODSClassMenu( this, TEAM_AMERICANS );
+	if ( FStrEq( szPanelName, PANEL_CLASS_AXIS ) ) return new CDODSClassMenu( this, TEAM_GERMANS );
 #endif
 
 	if ( Q_strcmp( PANEL_SCOREBOARD, szPanelName) == 0 )

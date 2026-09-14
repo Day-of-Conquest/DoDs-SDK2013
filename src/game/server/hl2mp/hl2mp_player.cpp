@@ -22,6 +22,9 @@
 #include "gamestats.h"
 #include "ammodef.h"
 #include "NextBot.h"
+#ifdef DODS_REMAKE
+#include "dods/dods_classes.h"
+#endif
 
 #include "engine/IEngineSound.h"
 #include "SoundEmitterSystem/isoundemittersystembase.h"
@@ -102,6 +105,8 @@ END_SEND_TABLE()
 IMPLEMENT_SERVERCLASS_ST(CHL2MP_Player, DT_HL2MP_Player)
 #ifdef DODS_REMAKE
 	SendPropBool( SENDINFO( m_bCrawling ) ),
+	SendPropInt( SENDINFO( m_iPlayerClass ), 5 ),
+	SendPropInt( SENDINFO( m_iDesiredPlayerClass ), 5 ),
 #endif
 	SendPropExclude( "DT_BaseEntity", "m_vecOrigin" ),
 
@@ -192,6 +197,7 @@ CHL2MP_Player::CHL2MP_Player() : m_PlayerAnimState( this )
 
 #ifdef DODS_REMAKE
 	SetCrawling(false, true);
+	m_iPlayerClass = m_iDesiredPlayerClass = DODS_CLASS_NONE;
 #endif
 
 	//UseClientSideAnimation();
@@ -215,6 +221,9 @@ void CHL2MP_Player::UpdateOnRemove( void )
 
 void CHL2MP_Player::Precache( void )
 {
+#ifdef DODS_REMAKE
+	PrecacheDODSClasses();
+#endif
 	BaseClass::Precache();
 
 	PrecacheModel ( "sprites/glow01.vmt" );
@@ -279,6 +288,9 @@ void CHL2MP_Player::GiveAllItems( void )
 
 void CHL2MP_Player::GiveDefaultItems( void )
 {
+#ifdef DODS_REMAKE
+	GiveDODSClassItems();
+#else
 	EquipSuit();
 
 	CBasePlayer::GiveAmmo( 255,	"Pistol");
@@ -287,7 +299,6 @@ void CHL2MP_Player::GiveDefaultItems( void )
 	CBasePlayer::GiveAmmo( 6,	"Buckshot");
 	CBasePlayer::GiveAmmo( 6,	"357" );
 
-#ifndef DODS_REMAKE
 	if ( GetPlayerModelType() == PLAYER_SOUNDS_METROPOLICE || GetPlayerModelType() == PLAYER_SOUNDS_COMBINESOLDIER )
 	{
 		GiveNamedItem( "weapon_stunstick" );
@@ -300,10 +311,7 @@ void CHL2MP_Player::GiveDefaultItems( void )
 	GiveNamedItem( "weapon_smg1" );
 	GiveNamedItem( "weapon_frag" );
 	GiveNamedItem( "weapon_physcannon" );
-#else
-	GiveNamedItem("weapon_colt");
-	GiveNamedItem("weapon_garand");
-#endif // !DODS_REMAKE
+
 
 
 	const char *szDefaultWeaponName = engine->GetClientConVarValue( engine->IndexOfEdict( edict() ), "cl_defaultweapon" );
@@ -318,6 +326,7 @@ void CHL2MP_Player::GiveDefaultItems( void )
 	{
 		Weapon_Switch( Weapon_OwnsThisType( "weapon_physcannon" ) );
 	}
+#endif // DODS_REMAKE
 }
 
 void CHL2MP_Player::PickDefaultSpawnTeam( void )
@@ -386,10 +395,17 @@ void CHL2MP_Player::Spawn(void)
 	m_flNextTeamChangeTime = 0.0f;
 
 	PickDefaultSpawnTeam();
+#ifdef DODS_REMAKE
+	const bool hasClass = PrepareDODSClass();
+#endif
 
 	BaseClass::Spawn();
 	
-	if ( !IsObserver() )
+	if ( !IsObserver()
+#ifdef DODS_REMAKE
+		&& hasClass
+#endif
+	)
 	{
 		pl.deadflag = false;
 		RemoveSolidFlags( FSOLID_NOT_SOLID );
@@ -427,10 +443,12 @@ void CHL2MP_Player::Spawn(void)
 
 	m_bReady = false;
 #ifdef DODS_REMAKE
-	if ( GetTeamNumber() == TEAM_UNASSIGNED )
+	if ( !hasClass )
 	{
 		RemoveAllItems( true );
 		State_Transition( STATE_OBSERVER_MODE );
+		if ( GetTeamNumber() == TEAM_AMERICANS || GetTeamNumber() == TEAM_GERMANS )
+			ShowClassSelectMenu();
 	}
 #endif
 }
@@ -795,6 +813,9 @@ extern ConVar hl2_normspeed;
 // Set the activity based on an event or current state
 void CHL2MP_Player::SetAnimation( PLAYER_ANIM playerAnim )
 {
+#ifdef DODS_REMAKE
+		return;
+#else
 	int animDesired;
 
 	float speed;
@@ -956,6 +977,8 @@ void CHL2MP_Player::SetAnimation( PLAYER_ANIM playerAnim )
 	// Reset to first frame of desired animation
 	ResetSequence( animDesired );
 	SetCycle( 0 );
+
+#endif
 }
 
 
@@ -1039,6 +1062,14 @@ void CHL2MP_Player::ChangeTeam( int iTeam )
 		}
 	}
 
+#ifdef DODS_REMAKE
+ if ( iTeam != GetTeamNumber() )
+ {
+  m_iPlayerClass = m_iDesiredPlayerClass = DODS_CLASS_NONE;
+  ShowViewPortPanel( PANEL_CLASS_ALLIES, false );
+  ShowViewPortPanel( PANEL_CLASS_AXIS, false );
+ }
+#endif
 	BaseClass::ChangeTeam( iTeam );
 
 	m_flNextTeamChangeTime = gpGlobals->curtime + TEAM_CHANGE_INTERVAL;
@@ -1068,9 +1099,6 @@ void CHL2MP_Player::ChangeTeam( int iTeam )
 bool CHL2MP_Player::HandleCommand_JoinTeam( int team )
 {
 #ifdef DODS_REMAKE
-	const bool enteringPlay = GetTeamNumber() == TEAM_UNASSIGNED || GetTeamNumber() == TEAM_SPECTATOR;
-#endif
-#ifdef DODS_REMAKE
 	if ( team == TEAM_UNASSIGNED )
 	{
 		CTeam *pAmericans = GetGlobalTeam( TEAM_AMERICANS );
@@ -1089,6 +1117,13 @@ bool CHL2MP_Player::HandleCommand_JoinTeam( int team )
 		return false;
 	}
 
+#ifdef DODS_REMAKE
+ if ( team == GetTeamNumber() && ( team == TEAM_AMERICANS || team == TEAM_GERMANS ) )
+ {
+  ShowClassSelectMenu();
+  return true;
+ }
+#endif
 	if ( team == TEAM_SPECTATOR )
 	{
 		// Prevent this is the cvar is set
@@ -1122,8 +1157,12 @@ bool CHL2MP_Player::HandleCommand_JoinTeam( int team )
 	ChangeTeam( team );
 
 #ifdef DODS_REMAKE
-	if ( enteringPlay )
-		Spawn();
+ if ( m_iDesiredPlayerClass == DODS_CLASS_NONE )
+ {
+  RemoveAllItems( true );
+  State_Transition( STATE_OBSERVER_MODE );
+ }
+ ShowClassSelectMenu();
 #endif
 
 	return true;
@@ -1131,6 +1170,20 @@ bool CHL2MP_Player::HandleCommand_JoinTeam( int team )
 
 bool CHL2MP_Player::ClientCommand( const CCommand &args )
 {
+#ifdef DODS_REMAKE
+ if ( !Q_strncmp( args[0], "cls_", 4 ) || FStrEq( args[0], "joinclass" ) )
+ {
+  int index = DODSFindClass( GetTeamNumber(), args[0] );
+  if ( FStrEq( args[0], "joinclass" ) && args.ArgC() == 2 )
+  {
+   char *end = NULL;
+   long parsed = strtol( args[1], &end, 10 );
+   if ( end != args[1] && *end == '\0' && parsed >= DODS_CLASS_RANDOM && parsed < DODS_CLASS_COUNT ) index = (int)parsed;
+  }
+  if ( ShouldRunRateLimitedCommand( args ) ) HandleCommand_JoinClass( index );
+  return true;
+ }
+#endif
 	if ( FStrEq( args[0], "spectate" ) )
 	{
 		if ( ShouldRunRateLimitedCommand( args ) )

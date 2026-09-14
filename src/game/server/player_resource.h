@@ -39,6 +39,9 @@ protected:
 	CNetworkArray( int, m_iDeaths, MAX_PLAYERS_ARRAY_SAFE );
 	CNetworkArray( int, m_bConnected, MAX_PLAYERS_ARRAY_SAFE );
 	CNetworkArray( int, m_iTeam, MAX_PLAYERS_ARRAY_SAFE );
+#if defined( DODS_REMAKE ) && defined( HL2MP )
+	CNetworkArray( int, m_iDODSReservedClass, MAX_PLAYERS_ARRAY_SAFE );
+#endif
 	CNetworkArray( int, m_bAlive, MAX_PLAYERS_ARRAY_SAFE );
 	CNetworkArray( int, m_iHealth, MAX_PLAYERS_ARRAY_SAFE );
 	CNetworkArray( uint32, m_iAccountID, MAX_PLAYERS_ARRAY_SAFE );

@@ -24,6 +24,9 @@ IMPLEMENT_CLIENTCLASS_DT_NOBASE(C_PlayerResource, DT_PlayerResource, CPlayerReso
 	RecvPropArray3( RECVINFO_ARRAY(m_iDeaths), RecvPropInt( RECVINFO(m_iDeaths[0]))),
 	RecvPropArray3( RECVINFO_ARRAY(m_bConnected), RecvPropInt( RECVINFO(m_bConnected[0]))),
 	RecvPropArray3( RECVINFO_ARRAY(m_iTeam), RecvPropInt( RECVINFO(m_iTeam[0]))),
+#if defined( DODS_REMAKE ) && defined( HL2MP )
+	RecvPropArray3( RECVINFO_ARRAY( m_iDODSReservedClass ), RecvPropInt( RECVINFO( m_iDODSReservedClass[0] ) ) ),
+#endif
 	RecvPropArray3( RECVINFO_ARRAY(m_bAlive), RecvPropInt( RECVINFO(m_bAlive[0]))),
 	RecvPropArray3( RECVINFO_ARRAY(m_iHealth), RecvPropInt( RECVINFO(m_iHealth[0]))),
 	RecvPropArray3( RECVINFO_ARRAY(m_iAccountID), RecvPropInt( RECVINFO(m_iAccountID[0]))),
@@ -62,6 +65,9 @@ C_PlayerResource::C_PlayerResource()
 	memset( m_iDeaths, 0, sizeof( m_iDeaths ) );
 	memset( m_bConnected, 0, sizeof( m_bConnected ) );
 	memset( m_iTeam, 0, sizeof( m_iTeam ) );
+#if defined( DODS_REMAKE ) && defined( HL2MP )
+	for ( int i = 0; i < MAX_PLAYERS_ARRAY_SAFE; ++i ) m_iDODSReservedClass[i] = -1;
+#endif
 	memset( m_bAlive, 0, sizeof( m_bAlive ) );
 	memset( m_iHealth, 0, sizeof( m_iHealth ) );
 	memset( m_iAccountID, 0, sizeof( m_iAccountID ) );

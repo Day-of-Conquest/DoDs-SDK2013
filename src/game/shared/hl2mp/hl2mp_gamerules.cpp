@@ -781,7 +781,11 @@ void CHL2MPRules::ClientSettingsChanged( CBasePlayer *pPlayer )
 	const char *szModelName = engine->GetClientConVarValue( engine->IndexOfEdict( pPlayer->edict() ), "cl_playermodel" );
 
 	//If we're different.
-	if ( stricmp( szModelName, pCurrentModel ) )
+	if ( stricmp( szModelName, pCurrentModel )
+#ifdef DODS_REMAKE
+  && pHL2Player->GetPlayerClass() < 0 // Class scripts own the model once a class is active.
+#endif
+ )
 	{
 		//Too soon, set the cvar back to what it was.
 		//Note: this will make this function be called again

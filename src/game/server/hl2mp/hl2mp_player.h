@@ -54,6 +54,8 @@ public:
 	DECLARE_ENT_SCRIPTDESC();
 
 #ifdef DODS_REMAKE
+	int GetPlayerClass() const { return m_iPlayerClass; }
+	int GetDesiredPlayerClass() const { return m_iDesiredPlayerClass; }
 	bool				IsCrawling(void) const;
 	bool				SetCrawling(bool bCrawling, bool bNoAnimation);
 #endif
@@ -64,6 +66,14 @@ public:
 	virtual void PreThink( void );
 	virtual void PlayerDeathThink( void );
 	virtual void SetAnimation( PLAYER_ANIM playerAnim );
+#ifdef DODS_REMAKE
+ bool HandleCommand_JoinClass( int index );
+ void ShowClassSelectMenu();
+ bool CanChooseDODSClass( int index ) const;
+ bool PrepareDODSClass();
+ void PrecacheDODSClasses();
+ void GiveDODSClassItems();
+#endif
 	virtual bool HandleCommand_JoinTeam( int team );
 	virtual bool ClientCommand( const CCommand &args );
 	virtual void CreateViewModel( int viewmodelindex = 0 );
@@ -152,6 +162,8 @@ private:
 
 #ifdef DODS_REMAKE
 	CNetworkVar(bool, m_bCrawling);
+	CNetworkVar( int, m_iPlayerClass );
+	CNetworkVar( int, m_iDesiredPlayerClass );
 #endif
 
 	CNetworkQAngle( m_angEyeAngles );

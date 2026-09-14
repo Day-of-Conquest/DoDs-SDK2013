@@ -49,6 +49,8 @@ END_RECV_TABLE()
 IMPLEMENT_CLIENTCLASS_DT(C_HL2MP_Player, DT_HL2MP_Player, CHL2MP_Player)
 #ifdef DODS_REMAKE
 	RecvPropBool( RECVINFO( m_bCrawling ) ),
+	RecvPropInt( RECVINFO( m_iPlayerClass ) ),
+	RecvPropInt( RECVINFO( m_iDesiredPlayerClass ) ),
 #endif
 	RecvPropDataTable( "hl2mplocaldata", 0, 0, &REFERENCE_RECV_TABLE( DT_HL2MPLocalPlayerExclusive ) ),
 	RecvPropDataTable( "hl2mpnonlocaldata", 0, 0, &REFERENCE_RECV_TABLE( DT_HL2MPNonLocalPlayerExclusive ) ),
@@ -110,6 +112,7 @@ C_HL2MP_Player::C_HL2MP_Player() : m_PlayerAnimState( this ), m_iv_angEyeAngles(
 {
 #ifdef DODS_REMAKE
 	SetCrawling( false, true );
+	m_iPlayerClass = m_iDesiredPlayerClass = -1;
 #endif
 	m_iIDEntIndex = 0;
 	m_iSpawnInterpCounterCache = 0;
