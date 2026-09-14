@@ -8,6 +8,7 @@
 #include "datacache/imdlcache.h"
 #include "base_playeranimstate.h"
 #include "hl2mp_playeranimstate.h"
+#include "dods/weapons/dods_weaponbase.h"
 
 #ifdef CLIENT_DLL
 #include "c_hl2mp_player.h"
@@ -22,6 +23,10 @@
 extern ConVar anim_showmainactivity;
 extern ConVar mp_showgestureslots;
 
+#define DODS_RUN_SPEED			120.0f
+#define DODS_WALK_SPEED			60.0f
+#define DODS_SPRINT_SPEED		260.0f
+
 //-----------------------------------------------------------------------------
 // Purpose: 
 // Input  : *pPlayer - 
@@ -34,9 +39,9 @@ CHL2MPPlayerAnimState *CreateHL2MPPlayerAnimState( CHL2MP_Player *pPlayer )
 	MultiPlayerMovementData_t movementData;
 
 	movementData.m_flBodyYawRate = 720.0f;
-	movementData.m_flRunSpeed = HL2MP_RUN_SPEED;
-	movementData.m_flWalkSpeed = HL2MP_WALK_SPEED;
-	movementData.m_flSprintSpeed = -1.0f;
+	movementData.m_flRunSpeed = DODS_RUN_SPEED;
+	movementData.m_flWalkSpeed = DODS_WALK_SPEED;
+	movementData.m_flSprintSpeed = DODS_SPRINT_SPEED;
 
 	CHL2MPPlayerAnimState *pRet = new CHL2MPPlayerAnimState( pPlayer, movementData );
 
@@ -134,21 +139,32 @@ void CHL2MPPlayerAnimState::DoAnimationEvent( PlayerAnimEvent_t event, int nData
 	switch ( event )
 	{
 	case PLAYERANIMEVENT_ATTACK_PRIMARY:
+		{
+			Activity activity = TranslateActivity( ACT_RANGE_ATTACK1 );
+			RestartGesture( GESTURE_SLOT_ATTACK_AND_RELOAD, activity );
+			break;
+		}
+
 	case PLAYERANIMEVENT_ATTACK_SECONDARY:
 		{
-			RestartGesture( GESTURE_SLOT_ATTACK_AND_RELOAD, ACT_HL2MP_GESTURE_RANGE_ATTACK );
+			Activity activity = TranslateActivity( ACT_RANGE_ATTACK2 );
+			RestartGesture( GESTURE_SLOT_ATTACK_AND_RELOAD, activity );
 			break;
 		}
+
 	case PLAYERANIMEVENT_RELOAD:
 		{
-			RestartGesture( GESTURE_SLOT_ATTACK_AND_RELOAD, ACT_HL2MP_GESTURE_RELOAD );
+			Activity activity = TranslateActivity( ACT_RELOAD );
+			RestartGesture( GESTURE_SLOT_ATTACK_AND_RELOAD, activity );
 			break;
 		}
+
 	case PLAYERANIMEVENT_CANCEL:
 		{
 			ResetGestureSlot( GESTURE_SLOT_ATTACK_AND_RELOAD );
 			break;
 		}
+
 	default:
 		{
 			BaseClass::DoAnimationEvent( event, nData );
@@ -156,18 +172,17 @@ void CHL2MPPlayerAnimState::DoAnimationEvent( PlayerAnimEvent_t event, int nData
 		}
 	}
 }
-
 //-----------------------------------------------------------------------------
 // Purpose: 
 // Output : Activity
 //-----------------------------------------------------------------------------
 Activity CHL2MPPlayerAnimState::CalcMainActivity( void )
 {
-	Activity idealActivity = ACT_HL2MP_IDLE;
+	Activity idealActivity = ACT_IDLE;
 
 	if ( HandleJumping( idealActivity ) ||
-	     HandleHovering( idealActivity ) ||
 	     HandleSwimming( idealActivity ) ||
+	     HandleProne( idealActivity ) ||
 	     HandleDucking( idealActivity ) ||
 	     HandleMoving( idealActivity ) )
 	{
@@ -195,14 +210,123 @@ Activity CHL2MPPlayerAnimState::TranslateActivity( Activity actDesired )
 	if ( !pPlayer )
 		return actDesired;
 
-	Activity translateActivity = actDesired;
+	Activity idealActivity = actDesired;
 
-	CBaseCombatWeapon *pWeapon = pPlayer->GetActiveWeapon();
+	CWeaponDODSBase *pWeapon = dynamic_cast<CWeaponDODSBase *>( pPlayer->GetActiveWeapon() );
 
-	if ( pWeapon )
-		translateActivity = pWeapon->ActivityOverride( translateActivity, false );
+	if ( pWeapon && pWeapon->IsScoped() )
+	{
+		switch ( idealActivity )
+		{
+		case ACT_IDLE:
+			idealActivity = ACT_DOD_IDLE_ZOOMED;
+			break;
 
-	return translateActivity;
+		case ACT_WALK:
+		case ACT_RUN:
+			idealActivity = ACT_DOD_WALK_ZOOMED;
+			break;
+
+		case ACT_CROUCHIDLE:
+			idealActivity = ACT_DOD_CROUCH_ZOOMED;
+			break;
+
+		case ACT_RUN_CROUCH:
+			idealActivity = ACT_DOD_CROUCHWALK_ZOOMED;
+			break;
+
+		case ACT_PRONE_IDLE:
+			idealActivity = ACT_DOD_PRONE_ZOOMED;
+			break;
+
+		case ACT_PRONE_FORWARD:
+			idealActivity = ACT_DOD_PRONE_FORWARD_ZOOMED;
+			break;
+
+		default:
+			break;
+		}
+	}
+	else if ( pPlayer->IsCrawling() )
+	{
+		switch ( idealActivity )
+		{
+		case ACT_RANGE_ATTACK1:
+			idealActivity = ACT_DOD_PRIMARYATTACK_PRONE;
+			break;
+
+		case ACT_RANGE_ATTACK2:
+			idealActivity = ACT_DOD_SECONDARYATTACK_PRONE;
+			break;
+
+		case ACT_RELOAD:
+			idealActivity = ACT_DOD_RELOAD_PRONE;
+			break;
+
+		default:
+			break;
+		}
+	}
+	else if ( pPlayer->GetFlags() & FL_DUCKING )
+	{
+		switch ( idealActivity )
+		{
+		case ACT_RANGE_ATTACK1:
+			idealActivity = ACT_DOD_PRIMARYATTACK_CROUCH;
+			break;
+
+		case ACT_RANGE_ATTACK2:
+			idealActivity = ACT_DOD_SECONDARYATTACK_CROUCH;
+			break;
+
+		case ACT_DOD_HS_IDLE:
+			idealActivity = ACT_DOD_HS_CROUCH;
+			break;
+
+		default:
+			break;
+		}
+	}
+
+	switch ( idealActivity )
+	{
+	case ACT_IDLE:
+		idealActivity = ACT_DOD_STAND_IDLE;
+		break;
+
+	case ACT_CROUCHIDLE:
+		idealActivity = ACT_DOD_CROUCH_IDLE;
+		break;
+
+	case ACT_RUN_CROUCH:
+		idealActivity = ACT_DOD_CROUCHWALK_IDLE;
+		break;
+
+	case ACT_WALK:
+		idealActivity = ACT_DOD_WALK_IDLE;
+		break;
+
+	case ACT_RUN:
+		idealActivity = ACT_DOD_RUN_IDLE;
+		break;
+
+	default:
+		break;
+	}
+
+	switch (idealActivity)
+	{
+	case ACT_HOP:
+		return idealActivity;
+
+	default:
+		break;
+	}
+
+	if (pWeapon)
+		idealActivity = pWeapon->ActivityOverride(idealActivity, false);
+
+	return idealActivity;
 }
 
 //-----------------------------------------------------------------------------
@@ -217,36 +341,34 @@ bool CHL2MPPlayerAnimState::HandleJumping( Activity &idealActivity )
 	if ( !pPlayer )
 		return false;
 
-	if ( m_bJumping )
+	if ( pPlayer->GetMoveType() != MOVETYPE_WALK )
+		return false;
+
+	if ( pPlayer->GetWaterLevel() >= WL_Waist )
+		return false;
+
+	bool bOnGround = ( pPlayer->GetFlags() & FL_ONGROUND ) != 0;
+
+	if ( !bOnGround )
 	{
-		if ( m_bFirstJumpFrame )
+		if ( !m_bJumping )
 		{
-			m_bFirstJumpFrame = false;
-
+			m_bJumping = true;
 			RestartMainSequence();
 		}
 
-		if ( pPlayer->GetWaterLevel() >= WL_Waist )
-		{
-			m_bJumping = false;
+		idealActivity = ACT_HOP;
 
-			RestartMainSequence();
-		}
-		else if ( gpGlobals->curtime - m_flJumpStartTime > 0.2f )
-		{
-			if ( pPlayer->GetFlags() & FL_ONGROUND )
-			{
-				m_bJumping = false;
-
-				RestartMainSequence();
-			}
-		}
-
-		if ( m_bJumping )
-			idealActivity = ACT_HL2MP_JUMP;
+		return true;
 	}
 
-	return m_bJumping;
+	if ( m_bJumping )
+	{
+		m_bJumping = false;
+		RestartMainSequence();
+	}
+
+	return false;
 }
 
 //-----------------------------------------------------------------------------
@@ -334,37 +456,60 @@ bool CHL2MPPlayerAnimState::HandleDucking( Activity &idealActivity )
 	if ( !pPlayer )
 		return false;
 
-	bool bDucking = pPlayer->GetFlags() & FL_DUCKING;
+	bool bDucking = ( pPlayer->GetFlags() & FL_DUCKING ) != 0;
 
 	if ( bDucking )
 	{
 		if ( GetOuterXYSpeed() > MOVING_MINIMUM_SPEED )
-			idealActivity = ACT_HL2MP_WALK_CROUCH;
+			idealActivity = ACT_RUN_CROUCH;
 		else
-			idealActivity = ACT_HL2MP_IDLE_CROUCH;
+			idealActivity = ACT_CROUCHIDLE;
 	}
 
 	return bDucking;
 }
-
-//-----------------------------------------------------------------------------
-// Purpose: 
-// Input  : *idealActivity - 
-// Output : Returns true on success, false on failure.
-//-----------------------------------------------------------------------------
-bool CHL2MPPlayerAnimState::HandleMoving( Activity &idealActivity )
+bool CHL2MPPlayerAnimState::HandleProne( Activity &idealActivity )
 {
 	CHL2MP_Player *pPlayer = GetHL2MPPlayer();
 
 	if ( !pPlayer )
 		return false;
 
-	bool bMoving = GetOuterXYSpeed() > MOVING_MINIMUM_SPEED;
+	if ( !pPlayer->IsCrawling() )
+		return false;
 
-	if ( bMoving )
-		idealActivity = ACT_HL2MP_RUN;
+	if ( GetOuterXYSpeed() > MOVING_MINIMUM_SPEED )
+		idealActivity = ACT_PRONE_FORWARD;
+	else
+		idealActivity = ACT_PRONE_IDLE;
 
-	return bMoving;
+	return true;
+}
+//-----------------------------------------------------------------------------
+// Purpose: 
+// Input  : *idealActivity - 
+// Output : Returns true on success, false on failure.
+//-----------------------------------------------------------------------------
+bool CHL2MPPlayerAnimState::HandleMoving(Activity& idealActivity)
+{
+	CHL2MP_Player* pPlayer = GetHL2MPPlayer();
+
+	if (!pPlayer)
+		return false;
+
+	float flSpeed = GetOuterXYSpeed();
+
+	if (flSpeed <= MOVING_MINIMUM_SPEED)
+		return false;
+
+	if (flSpeed >= 260.0f)
+		idealActivity = ACT_SPRINT;
+	else if (flSpeed >= 120.0f)
+		idealActivity = ACT_RUN;
+	else
+		idealActivity = ACT_WALK;
+
+	return true;
 }
 
 //-----------------------------------------------------------------------------
@@ -406,11 +551,20 @@ bool CHL2MPPlayerAnimState::SetupPoseParameters( CStudioHdr *pStudioHdr )
 	if ( !pPlayer )
 		return false;
 
-	m_PoseParameterData.m_iMoveX = pPlayer->LookupPoseParameter( pStudioHdr, "move_yaw" );
-	m_PoseParameterData.m_iMoveY = pPlayer->LookupPoseParameter( pStudioHdr, "move_yaw" );
+	m_PoseParameterData.m_iMoveX = pPlayer->LookupPoseParameter( pStudioHdr, "move_x" );
+	m_PoseParameterData.m_iMoveY = pPlayer->LookupPoseParameter( pStudioHdr, "move_y" );
 
-	m_PoseParameterData.m_iAimPitch = pPlayer->LookupPoseParameter( pStudioHdr, "aim_pitch" );
-	m_PoseParameterData.m_iAimYaw = pPlayer->LookupPoseParameter( pStudioHdr, "aim_yaw" );
+	m_PoseParameterData.m_iAimPitch = pPlayer->LookupPoseParameter( pStudioHdr, "body_pitch" );
+	m_PoseParameterData.m_iAimYaw = pPlayer->LookupPoseParameter( pStudioHdr, "body_yaw" );
+
+	if ( m_PoseParameterData.m_iMoveX < 0 ||
+		 m_PoseParameterData.m_iMoveY < 0 ||
+		 m_PoseParameterData.m_iAimPitch < 0 ||
+		 m_PoseParameterData.m_iAimYaw < 0 )
+	{
+
+		return false;
+	}
 
 	m_bPoseParameterInit = true;
 
@@ -474,27 +628,40 @@ void CHL2MPPlayerAnimState::ComputePoseParam_MoveYaw( CStudioHdr *pStudioHdr )
 	if ( !pPlayer )
 		return;
 
-	EstimateYaw();
+	Vector vecVelocity;
+	GetOuterAbsVelocity( vecVelocity );
 
-	QAngle angles = GetRenderAngles();
+	vecVelocity.z = 0.0f;
 
-	float flYaw = angles[YAW];
+	float flSpeed = vecVelocity.Length2D();
 
-	if ( flYaw > 180.0f )
-		flYaw -= 360.0f;
-	else if ( flYaw < -180.0f )
-		flYaw += 360.0f;
+	if ( flSpeed <= MOVING_MINIMUM_SPEED )
+	{
+		pPlayer->SetPoseParameter( pStudioHdr, m_PoseParameterData.m_iMoveX, 0.0f );
+		pPlayer->SetPoseParameter( pStudioHdr, m_PoseParameterData.m_iMoveY, 0.0f );
+		return;
+	}
 
-	flYaw -= m_PoseParameterData.m_flEstimateYaw;
-	flYaw = -flYaw;
-	flYaw = flYaw - (int)(flYaw / 360) * 360;
+	VectorNormalize( vecVelocity );
 
-	if ( flYaw < -180 )
-		flYaw = flYaw + 360;
-	else if ( flYaw > 180 )
-		flYaw = flYaw - 360;
+	QAngle angFacing = GetRenderAngles();
 
-	pPlayer->SetPoseParameter( pStudioHdr, m_PoseParameterData.m_iMoveY, flYaw );
+	angFacing[PITCH] = 0.0f;
+	angFacing[ROLL] = 0.0f;
+
+	Vector vecForward;
+	Vector vecRight;
+
+	AngleVectors( angFacing, &vecForward, &vecRight, NULL );
+
+	float flForward = DotProduct( vecVelocity, vecForward );
+	float flSide = -DotProduct( vecVelocity, vecRight );
+
+	flForward = clamp( flForward, -1.0f, 1.0f );
+	flSide = clamp( flSide, -1.0f, 1.0f );
+
+	pPlayer->SetPoseParameter( pStudioHdr, m_PoseParameterData.m_iMoveX, flForward );
+	pPlayer->SetPoseParameter( pStudioHdr, m_PoseParameterData.m_iMoveY, flSide );
 }
 
 //-----------------------------------------------------------------------------
@@ -510,7 +677,7 @@ void CHL2MPPlayerAnimState::ComputePoseParam_AimPitch( CStudioHdr *pStudioHdr )
 
 	float flAimPitch = m_flEyePitch;
 
-	pPlayer->SetPoseParameter( pStudioHdr, m_PoseParameterData.m_iAimPitch, flAimPitch );
+	pPlayer->SetPoseParameter( pStudioHdr, m_PoseParameterData.m_iAimPitch, -flAimPitch );
 
 	m_DebugAnimData.m_flAimPitch = flAimPitch;
 }

@@ -41,6 +41,7 @@ public:
 	bool HandleHovering( Activity &idealActivity );
 	bool HandleSwimming( Activity &idealActivity );
 	bool HandleDucking( Activity &idealActivity );
+	bool HandleProne(Activity& idealActivity);
 	bool HandleMoving( Activity &idealActivity );
 
 	virtual float GetCurrentMaxGroundSpeed( void );
