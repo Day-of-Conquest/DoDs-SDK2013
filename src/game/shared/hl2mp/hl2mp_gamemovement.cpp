@@ -7,6 +7,9 @@
 #include "cbase.h"
 #include "hl2mp_gamemovement.h"
 #include "in_buttons.h"
+#ifdef DODS_REMAKE
+#include "hl2mp_gamerules.h"
+#endif
 
 //-----------------------------------------------------------------------------
 // Purpose: 
@@ -34,6 +37,17 @@ bool CHL2MPGameMovement::CheckJumpButton( void )
 }
 
 #if defined( DODS_REMAKE ) && defined( HL2MP )
+unsigned int CDODSGameMovement::PlayerSolidMask( bool brushOnly )
+{
+ unsigned int mask = BaseClass::PlayerSolidMask( brushOnly );
+ if ( player && !player->IsObserver() )
+ {
+  if ( player->GetTeamNumber() == TEAM_AMERICANS ) mask |= CONTENTS_TEAM1;
+  if ( player->GetTeamNumber() == TEAM_GERMANS ) mask |= CONTENTS_TEAM2;
+ }
+ return mask;
+}
+
 void CDODSGameMovement::Duck(void)
 {
 	CHL2MP_Player* pPlayer = static_cast<CHL2MP_Player*>(player);

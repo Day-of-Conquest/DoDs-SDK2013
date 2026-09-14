@@ -38,9 +38,11 @@ $Project "Client (HL2MP)"
 
 		$Folder	"Day of Defeat Source"
 		{
+			$File	"$SRCDIR\game\shared\dods\dods_teamblocker.cpp"
 			$File	"$SRCDIR\game\shared\dods\dods_classes.cpp"
 			$File	"$SRCDIR\game\shared\dods\dods_classes.h"
 			$File	"dods\ui\dods_classmenu.cpp"
+			$File	"dods\ui\dods_hud_objectives.cpp"
 			$File	"dods\ui\dods_classmenu.h"
 			$File	"game_controls\classmenu.cpp"
 			$File	"game_controls\classmenu.h"

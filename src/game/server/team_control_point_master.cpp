@@ -53,7 +53,9 @@ BEGIN_DATADESC( CTeamControlPointMaster )
 
 END_DATADESC()
 
+#if !defined( DODS_REMAKE ) || !defined( HL2MP )
 LINK_ENTITY_TO_CLASS( team_control_point_master, CTeamControlPointMaster );
+#endif
 
 ConVar mp_time_between_capscoring( "mp_time_between_capscoring", "30", FCVAR_GAMEDLL, "Delay between scoring of owned capture points.", true, 1, false, 0 );
 

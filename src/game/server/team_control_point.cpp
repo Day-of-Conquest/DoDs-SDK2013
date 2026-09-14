@@ -71,7 +71,9 @@ BEGIN_DATADESC(CTeamControlPoint)
 	DEFINE_THINKFUNC( AnimThink ),
 END_DATADESC();
 
+#if !defined( DODS_REMAKE ) || !defined( HL2MP )
 LINK_ENTITY_TO_CLASS( team_control_point, CTeamControlPoint );
+#endif
 
 //-----------------------------------------------------------------------------
 // Purpose: 

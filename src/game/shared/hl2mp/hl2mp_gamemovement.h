@@ -34,6 +34,7 @@ private:
 class CDODSGameMovement : public CHL2MPGameMovement
 {
 public:
+	unsigned int PlayerSolidMask( bool brushOnly = false ) OVERRIDE;
 	typedef CHL2MPGameMovement BaseClass;
 	virtual void Duck(void) OVERRIDE;
 	virtual bool CheckJumpButton(void) OVERRIDE;
